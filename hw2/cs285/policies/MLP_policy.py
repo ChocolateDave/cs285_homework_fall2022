@@ -1,8 +1,9 @@
 import abc
 import itertools
 from torch import nn
-from torch.nn import functional as F
 from torch import optim
+from torch.distributions import Distribution
+from torch.nn import functional as F
 
 import numpy as np
 import torch
@@ -49,11 +50,16 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
                                         self.learning_rate)
         else:
             self.logits_na = None
-            self.mean_net = ptu.build_mlp(input_size=self.ob_dim,
-                                      output_size=self.ac_dim,
-                                      n_layers=self.n_layers, size=self.size)
+            self.mean_net = ptu.build_mlp(
+                input_size=self.ob_dim,
+                output_size=self.ac_dim,
+                n_layers=self.n_layers,
+                size=self.size
+            )
             self.logstd = nn.Parameter(
-                torch.zeros(self.ac_dim, dtype=torch.float32, device=ptu.device)
+                torch.zeros(
+                    self.ac_dim, dtype=torch.float32, device=ptu.device
+                )
             )
             self.mean_net.to(ptu.device)
             self.logstd.to(ptu.device)
@@ -86,7 +92,19 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
     # query the policy with observation(s) to get selected action(s)
     def get_action(self, obs: np.ndarray) -> np.ndarray:
-        # TODO: get this from HW1
+        if len(obs.shape) > 1:
+            # Batch inputs
+            observation = obs
+        else:
+            # Extend batch dimension
+            observation = obs[None, ...]
+
+        observation = ptu.from_numpy(observation)
+        with torch.no_grad():
+            dist = self(observation)
+            actions = dist.sample().cpu().numpy()
+
+        return actions
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -113,9 +131,9 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
             )
             return action_distribution
 
-#####################################################
-#####################################################
 
+#####################################################
+#####################################################
 class MLPPolicyPG(MLPPolicy):
     def __init__(self, ac_dim, ob_dim, n_layers, size, **kwargs):
 
@@ -127,24 +145,35 @@ class MLPPolicyPG(MLPPolicy):
         actions = ptu.from_numpy(actions)
         advantages = ptu.from_numpy(advantages)
 
-        # TODO: update the policy using policy gradient
+        # DONE: update the policy using policy gradient
         # HINT1: Recall that the expression that we want to MAXIMIZE
-            # is the expectation over collected trajectories of:
-            # sum_{t=0}^{T-1} [grad [log pi(a_t|s_t) * (Q_t - b_t)]]
-        # HINT2: you will want to use the `log_prob` method on the distribution returned
-            # by the `forward` method
+        # is the expectation over collected trajectories of:
+        # sum_{t=0}^{T-1} [grad [log pi(a_t|s_t) * (Q_t - b_t)]]
 
-        TODO
+        # HINT2: you will want to use the `log_prob` method on
+        # the distribution returned by the `forward` method
+        batch_size = observations.shape[0]
+        self.optimizer.zero_grad()
+        dist: Distribution = self(observations)
+        loss = (-dist.log_prob(actions) * advantages).sum() / batch_size
+        loss.backward()
+        self.optimizer.step()
 
         if self.nn_baseline:
-            ## TODO: update the neural network baseline using the q_values as
-            ## targets. The q_values should first be normalized to have a mean
-            ## of zero and a standard deviation of one.
+            # DONE: update the neural network baseline using the q_values as
+            # targets. The q_values should first be normalized to have a mean
+            # of zero and a standard deviation of one.
 
-            ## Note: You will need to convert the targets into a tensor using
-                ## ptu.from_numpy before using it in the loss
-
-            TODO
+            # Note: You will need to convert the targets into a tensor using
+            # ptu.from_numpy before using it in the loss
+            self.baseline_optimizer.zero_grad()
+            baseline_loss = F.mse_loss(
+                self.run_baseline_prediction(observations),
+                ptu.from_numpy(q_values),
+                reduction='sum'
+            )
+            baseline_loss.backward()
+            self.baseline_optimizer.step()
 
         train_log = {
             'Training Loss': ptu.to_numpy(loss),
