@@ -18,11 +18,11 @@ def create_linear_layer(W, b) -> nn.Linear:
     return linear_layer
 
 
-def read_layer(l):
-    assert list(l.keys()) == ['AffineLayer']
-    assert sorted(l['AffineLayer'].keys()) == ['W', 'b']
-    return l['AffineLayer']['W'].astype(np.float32), l['AffineLayer'][
-        'b'].astype(np.float32)
+def read_layer(layer):
+    assert list(layer.keys()) == ['AffineLayer']
+    assert sorted(layer['AffineLayer'].keys()) == ['W', 'b']
+    return (layer['AffineLayer']['W'].astype(np.float32),
+            layer['AffineLayer']['b'].astype(np.float32))
 
 
 class LoadedGaussianPolicy(BasePolicy, nn.Module):
@@ -67,8 +67,8 @@ class LoadedGaussianPolicy(BasePolicy, nn.Module):
         assert list(self.policy_params['hidden'].keys()) == ['FeedforwardNet']
         layer_params = self.policy_params['hidden']['FeedforwardNet']
         for layer_name in sorted(layer_params.keys()):
-            l = layer_params[layer_name]
-            W, b = read_layer(l)
+            layer = layer_params[layer_name]
+            W, b = read_layer(layer)
             linear_layer = create_linear_layer(W, b)
             self.hidden_layers.append(linear_layer)
 
