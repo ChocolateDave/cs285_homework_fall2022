@@ -137,7 +137,7 @@ class PGAgent(BaseAgent):
                 # combine rews_list into a single array
                 rews = np.concatenate(rews_list)
 
-                # create empty numpy array to populate with GAE advantage 
+                # create empty numpy array to populate with GAE advantage
                 # estimates, with dummy T+1 value for simpler
                 # recursive calculation
                 batch_size = obs.shape[0]
@@ -188,7 +188,7 @@ class PGAgent(BaseAgent):
             batch_size, concat_rew=False)
 
     #####################################################
-    # HELPER FUNCTIONS 
+    # HELPER FUNCTIONS
     #####################################################
     def _discounted_return(self, rewards: List[float]) -> List[float]:
         """

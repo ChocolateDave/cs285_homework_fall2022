@@ -1,8 +1,7 @@
 import abc
 import itertools
-from typing import Any
+from typing import Any, Dict
 from torch import nn
-from torch.nn import functional as F
 from torch import optim
 
 import numpy as np
@@ -16,16 +15,15 @@ from cs285.policies.base_policy import BasePolicy
 class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
     def __init__(self,
-                 ac_dim,
-                 ob_dim,
-                 n_layers,
-                 size,
-                 discrete=False,
-                 learning_rate=1e-4,
-                 training=True,
-                 nn_baseline=False,
-                 **kwargs
-                 ):
+                 ac_dim: int,
+                 ob_dim: int,
+                 n_layers: int,
+                 size: int,
+                 discrete: bool = False,
+                 learning_rate: float = 1e-4,
+                 training: bool = True,
+                 nn_baseline: bool = False,
+                 **kwargs) -> None:
         super().__init__(**kwargs)
 
         # init vars
@@ -46,6 +44,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
                 size=self.size,
             )
             self.logits_na.to(ptu.device)
+            print("Logits Network:\n", self.logits_na)
             self.mean_net = None
             self.logstd = None
             self.optimizer = optim.Adam(self.logits_na.parameters(),
@@ -55,13 +54,18 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
             self.mean_net = ptu.build_mlp(
                 input_size=self.ob_dim,
                 output_size=self.ac_dim,
-                n_layers=self.n_layers, size=self.size,
+                n_layers=self.n_layers,
+                size=self.size,
             )
             self.mean_net.to(ptu.device)
+            print("Mean Net:\n", self.mean_net)
             self.logstd = nn.Parameter(
-                torch.zeros(self.ac_dim, dtype=torch.float32, device=ptu.device)
+                torch.zeros(self.ac_dim,
+                            dtype=torch.float32,
+                            device=ptu.device)
             )
             self.logstd.to(ptu.device)
+            print("Logstd Param:\n", self.logstd)
             self.optimizer = optim.Adam(
                 itertools.chain([self.logstd], self.mean_net.parameters()),
                 self.learning_rate
@@ -76,12 +80,18 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
     def get_action(self, obs: np.ndarray) -> np.ndarray:
         if len(obs.shape) > 1:
+            # Batch input
             observation = obs
         else:
+            # Extend batch dimension
             observation = obs[None]
 
-        # TODO return the action that the policy prescribes
-        raise NotImplementedError
+        observation = ptu.from_numpy(observation)
+        with torch.no_grad():
+            dist = self(observation)
+            actions = dist.sample().cpu().numpy()
+
+        return actions
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -92,8 +102,19 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # through it. For example, you can return a torch.FloatTensor. You can also
     # return more flexible objects, such as a
     # `torch.distributions.Distribution` object. It's up to you!
-    def forward(self, observation: torch.FloatTensor) -> Any:
-        raise NotImplementedError
+    def forward(self,
+                observation: torch.FloatTensor) -> distributions.Distribution:
+        if self.logits_na:
+            # act_hidden = F.softmax(self.logits_na(observation))
+            act_hidden = self.logits_na(observation)
+            dist = distributions.Categorical(prob=act_hidden)
+        else:
+            # Continuous action space
+            act_mean = self.mean_net(observation)
+            act_std = torch.ones_like(act_mean) * self.logstd.exp()
+            dist = distributions.Normal(act_mean, act_std)
+
+        return dist
 
 
 #####################################################
@@ -107,9 +128,16 @@ class MLPPolicySL(MLPPolicy):
     def update(
             self, observations, actions,
             adv_n=None, acs_labels_na=None, qvals=None
-    ):
-        # TODO: update the policy and return the loss
-        loss = TODO
+    ) -> Dict[str, Any]:
+
+        self.optimizer.zero_grad()
+        observations = ptu.from_numpy(observations)
+        actions = ptu.from_numpy(actions)
+        dist = self(observations)
+        act_pred = dist.rsample()
+        loss = self.loss(act_pred, actions)
+        loss.backward()
+        self.optimizer.step()
         return {
             # You can add extra logging information here, but keep this line
             'Training Loss': ptu.to_numpy(loss),
