@@ -5,6 +5,7 @@ from numpy import ndarray
 from .base_agent import BaseAgent
 from cs285.policies.MLP_policy import MLPPolicyPG
 from cs285.infrastructure.replay_buffer import ReplayBuffer
+from cs285.infrastructure.utils import normalize, unnormalize
 
 
 class PGAgent(BaseAgent):
@@ -125,10 +126,12 @@ class PGAgent(BaseAgent):
             # the same dimensionality to prevent silent broadcasting errors.
             assert values_unnormalized.ndim == q_values.ndim
 
-            # TODO: values were trained with standardized q_values, so ensure
+            # DONE: values were trained with standardized q_values, so ensure
             # that the predictions have the same mean and standard deviation
             # as the current batch of q_values
-            values = (values_unnormalized - q_values.mean()) / q_values.std()
+            values = unnormalize(
+                values_unnormalized, np.mean(q_values), np.std(q_values)
+            )
 
             if self.gae_lambda is not None:
                 # append a dummy T+1 value for simpler recursive calculation
@@ -157,12 +160,14 @@ class PGAgent(BaseAgent):
                             self.gae_lambda * values[i + 1] -
                             values[i]
                         )
+                        advantages[i] += self.gamma * \
+                            self.gae_lambda * advantages[i + 1]
 
                 # remove dummy advantage
                 advantages = advantages[:-1]
 
             else:
-                # TODO: compute advantage estimates using q_values,
+                # DONE: compute advantage estimates using q_values,
                 # and values as baselines
                 advantages = q_values - values
 
@@ -173,7 +178,9 @@ class PGAgent(BaseAgent):
         # Normalize the resulting advantages to have a mean of zero
         # and a standard deviation of one
         if self.standardize_advantages:
-            advantages = (advantages - advantages.mean()) / advantages.std()
+            advantages = normalize(
+                advantages, np.mean(advantages), np.std(advantages)
+            )
 
         return advantages
 
