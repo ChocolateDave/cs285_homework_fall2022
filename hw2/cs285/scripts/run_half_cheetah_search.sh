@@ -1,5 +1,5 @@
 echo "Search for optimal batch_size and learning rate for HalfCheetah.";
-for BATCh in 10000 30000 50000
+for BATCH in 10000 30000 50000
 do
     for LR in 0.005 0.01 0.02
     do
