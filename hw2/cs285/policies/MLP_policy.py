@@ -3,7 +3,7 @@ import itertools
 from torch import nn
 from torch import optim
 from torch.distributions import Distribution
-from torch.nn import functional as F
+# from torch.nn import functional as F
 
 import numpy as np
 import torch
@@ -169,7 +169,7 @@ class MLPPolicyPG(MLPPolicy):
             q_values = normalize(q_values, np.mean(q_values), np.std(q_values))
             self.baseline_optimizer.zero_grad()
             baseline_loss = self.baseline_loss(
-                self.baseline(observations), 
+                self.baseline(observations).squeeze(-1),
                 ptu.from_numpy(q_values)
             )
             baseline_loss.backward()
