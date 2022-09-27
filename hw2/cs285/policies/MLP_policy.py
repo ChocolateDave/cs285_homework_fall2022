@@ -11,6 +11,7 @@ from torch import distributions
 
 from cs285.infrastructure import pytorch_util as ptu
 from cs285.policies.base_policy import BasePolicy
+from cs285.infrastructure.utils import normalize
 
 
 class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
@@ -152,10 +153,9 @@ class MLPPolicyPG(MLPPolicy):
 
         # HINT2: you will want to use the `log_prob` method on
         # the distribution returned by the `forward` method
-        batch_size = observations.shape[0]
         self.optimizer.zero_grad()
         dist: Distribution = self(observations)
-        loss = (-dist.log_prob(actions) * advantages).sum() / batch_size
+        loss = (-dist.log_prob(actions) * advantages).sum()
         loss.backward()
         self.optimizer.step()
 
@@ -166,11 +166,11 @@ class MLPPolicyPG(MLPPolicy):
 
             # Note: You will need to convert the targets into a tensor using
             # ptu.from_numpy before using it in the loss
+            q_values = normalize(q_values, np.mean(q_values), np.std(q_values))
             self.baseline_optimizer.zero_grad()
-            baseline_loss = F.mse_loss(
-                self.run_baseline_prediction(observations),
-                ptu.from_numpy(q_values),
-                reduction='sum'
+            baseline_loss = self.baseline_loss(
+                self.baseline(observations), 
+                ptu.from_numpy(q_values)
             )
             baseline_loss.backward()
             self.baseline_optimizer.step()
