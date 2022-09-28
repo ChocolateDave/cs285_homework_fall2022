@@ -131,21 +131,83 @@ Department of Civil \& Environ. Eng.
     \newpage
     \section*{Experiment 3 LunarLander}
 
+    \begin{figure}[thbp]
+        \centering
+        \includegraphics[width=\textwidth]{exp_03.png}
+        \caption{Learning curves for the \texttt{LunarLander-v2}.}
+        \label{fig:3}
+    \end{figure}
+
+    \textbf{Command-line Codes}
+    \begin{lstlisting}
+        echo "Running LunarLander with reward-to-go estimator.";
+        python cs285/scripts/run_hw2.py --env_name LunarLanderContinuous-v2 --ep_len 1000 --discount 0.99 -n 100 -l 2 -s 64 -b 40000 -lr 0.005 --reward_to_go --nn_baseline --exp_name q3_b40000_r0.005;
+    \end{lstlisting}
+
     \newpage
     \section*{Experiment 4 HalfCheetah}
+
+    \textbf{Answer:}
+
+    The results from trying out different settings are shown in the following figure 4. From my experiments, the optimal settings are \texttt{b*=30000} and \texttt{lr*=0.02}.
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[width=0.75\textwidth]{exp_04_1.png}
+        \caption{Learning curves for the \texttt{HalfCheetah} experiments of different settings.}
+        \label{fig:4}
+    \end{figure}
+
+    Using the optimal settings to investigate the effect of reward-to-go and value estimator network, the results are shown in the following figure 5.
+    The switching from vanilla policy gradients to a reward-to-go formulation has more significant acceleration to the training converge than the value estimator.
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[width=0.75\textwidth]{exp_04_2.png} 
+        \caption{Learning curves of different policy gradient settings under optimal batch size and learning rate.}
+        \label{fig:5}
+    \end{figure}
+
+    \textbf{Command-line Codes}
+    \begin{lstlisting}
+        echo "Search for optimal batch_size and learning rate for HalfCheetah.";
+        for BATCH in 10000 30000 50000
+        do
+            for LR in 0.005 0.01 0.02
+            do
+                echo "Now running on batch_size=${BATCH}, learning_rate=${LR}.";
+                NAME="q4_search_b${BATCH}_lr${LR}_rtg_nnbaseline";
+                python $1 --env_name HalfCheetah-v4 --ep_len 150 --discount 0.95 -n 100 -l 2 -s 32 -b $BATCH -lr $LR -rtg --nn_baseline --exp_name $NAME;
+            done
+        done
+
+
+        BATCH=$2
+        LR=$3
+
+        echo "Running with optimal batch_size and learning rate for HalfCheetah.";
+        echo "Running baseline";
+        python $1 --env_name HalfCheetah-v4 --ep_len 150 --discount 0.95 -n 100 -l 2 -s 32 -b $BATCH -lr $LR --exp_name q4_b${BATCH}_r${LR};
+        echo "Running reward-to-go";
+        python $1 --env_name HalfCheetah-v4 --ep_len 150 --discount 0.95 -n 100 -l 2 -s 32 -b $BATCH -lr $LR -rtg --exp_name q4_b${BATCH}_r${LR}_rtg;
+        echo "Running with baseline neural network";
+        python $1 --env_name HalfCheetah-v4 --ep_len 150 --discount 0.95 -n 100 -l 2 -s 32 -b $BATCH -lr $LR --nn_baseline --exp_name q4_b${BATCH}_r${LR}_nnbaseline;
+        echo "Running with all";
+        python $1 --env_name HalfCheetah-v4 --ep_len 150 --discount 0.95 -n 100 -l 2 -s 32 -b $BATCH -lr $LR -rtg --nn_baseline --exp_name q4_b${BATCH}_r${LR}_rtg_nnbaseline
+    \end{lstlisting}
 
     \newpage
     \section*{Experiment 5 HopperV4}
 
     \textbf{Answers:}
 
-    The averaged evaluation returns with respect to training steps given different $\lambda$ settings is as shown in figure 5. Results show that the evaluation performance at the same timestep increases with a $\lambda$ increasing from 0.00 to 1.00, meaning reducing bias has benefits on the trainig procedure.
+    The averaged evaluation returns with respect to training steps given different $\lambda$ settings is as shown in figure 6. Results show that the evaluation performance at the same timestep increases with a $\lambda$ increasing from 0.00 to 1.00, meaning reducing bias has benefits on the trainig procedure.
 
     \begin{figure}[thbp]
        \centering
        \includegraphics[width=0.9\textwidth]{exp_05.png} 
        \caption{Learning curves for the \texttt{Hopper-v4} with different $\lambda$ settings.}
-       \label{fig:5}
+       \label{fig:6}
     \end{figure}
 
     \textbf{Command-line Codes}
