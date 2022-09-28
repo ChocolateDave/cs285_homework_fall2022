@@ -1,0 +1,401 @@
+﻿Name,Step,Evaluation Average Return
+Vanilla,1,-69.24481964
+Vanilla,2,-101.222229
+Vanilla,3,-141.0822449
+Vanilla,4,-86.7662735
+Vanilla,5,-109.0200195
+Vanilla,6,-130.7954712
+Vanilla,7,-123.8478394
+Vanilla,8,-93.93361664
+Vanilla,9,-77.45250702
+Vanilla,10,-111.8063736
+Vanilla,11,-116.2610855
+Vanilla,12,-83.1112442
+Vanilla,13,-73.83595276
+Vanilla,14,-58.29407883
+Vanilla,15,-71.10326385
+Vanilla,16,-83.46251678
+Vanilla,17,-107.0332565
+Vanilla,18,-40.92572021
+Vanilla,19,-32.65474319
+Vanilla,20,-54.44714355
+Vanilla,21,-54.08272171
+Vanilla,22,-60.3929863
+Vanilla,23,-59.27862167
+Vanilla,24,-54.31979752
+Vanilla,25,-54.21840286
+Vanilla,26,-47.13427353
+Vanilla,27,-57.59881592
+Vanilla,28,-41.04769135
+Vanilla,29,-40.8050499
+Vanilla,30,-42.06155777
+Vanilla,31,-29.29651451
+Vanilla,32,-44.31741333
+Vanilla,33,-49.12785721
+Vanilla,34,-41.91485214
+Vanilla,35,-48.6766777
+Vanilla,36,-37.97542953
+Vanilla,37,-38.20861435
+Vanilla,38,-43.81016541
+Vanilla,39,-50.75199509
+Vanilla,40,-28.22582817
+Vanilla,41,-30.45160484
+Vanilla,42,-14.50858021
+Vanilla,43,-32.25192642
+Vanilla,44,-8.423828125
+Vanilla,45,-46.82067871
+Vanilla,46,-22.47550964
+Vanilla,47,-26.0815258
+Vanilla,48,-38.73276901
+Vanilla,49,-44.12678909
+Vanilla,50,-49.47828293
+Vanilla,51,-30.2471981
+Vanilla,52,-23.40157318
+Vanilla,53,-44.98568726
+Vanilla,54,-42.18389511
+Vanilla,55,-25.14700127
+Vanilla,56,-3.094462633
+Vanilla,57,-51.50291061
+Vanilla,58,-2.962051153
+Vanilla,59,-12.57361507
+Vanilla,60,-9.754529953
+Vanilla,61,-16.77466393
+Vanilla,62,-18.69175529
+Vanilla,63,-33.5106926
+Vanilla,64,-6.242164612
+Vanilla,65,-29.3120327
+Vanilla,66,-1.023211122
+Vanilla,67,-4.121210575
+Vanilla,68,13.33291912
+Vanilla,69,-1.301566482
+Vanilla,70,-38.52508163
+Vanilla,71,-19.23403168
+Vanilla,72,-7.304254055
+Vanilla,73,-19.29199219
+Vanilla,74,-17.65621948
+Vanilla,75,-16.34284401
+Vanilla,76,-32.15125656
+Vanilla,77,-14.16352177
+Vanilla,78,-26.83091736
+Vanilla,79,-11.89589405
+Vanilla,80,-35.6020546
+Vanilla,81,-24.50274086
+Vanilla,82,25.29444885
+Vanilla,83,-27.8585434
+Vanilla,84,-33.42340469
+Vanilla,85,-14.36978531
+Vanilla,86,-52.36385727
+Vanilla,87,-21.87005806
+Vanilla,88,-26.52714539
+Vanilla,89,-62.41881943
+Vanilla,90,-50.36314774
+Vanilla,91,-38.29244232
+Vanilla,92,-45.43804932
+Vanilla,93,-54.93661118
+Vanilla,94,-56.32860947
+Vanilla,95,-58.33590698
+Vanilla,96,-58.39332199
+Vanilla,97,-55.10305786
+Vanilla,98,-32.1237793
+Vanilla,99,-34.44424057
+Vanilla,100,-21.56696129
+Reward-to-go,1,-57.57152939
+Reward-to-go,2,-74.82427979
+Reward-to-go,3,-104.9575577
+Reward-to-go,4,-102.165657
+Reward-to-go,5,-71.27120209
+Reward-to-go,6,-74.39218903
+Reward-to-go,7,-39.07088089
+Reward-to-go,8,-45.6050148
+Reward-to-go,9,-64.74337769
+Reward-to-go,10,-30.36210632
+Reward-to-go,11,-40.55140305
+Reward-to-go,12,-17.64698219
+Reward-to-go,13,-16.95772552
+Reward-to-go,14,-43.58097458
+Reward-to-go,15,-23.77661133
+Reward-to-go,16,-26.0536499
+Reward-to-go,17,-34.07065201
+Reward-to-go,18,-43.62649155
+Reward-to-go,19,-58.19943237
+Reward-to-go,20,-24.98628235
+Reward-to-go,21,-17.1177063
+Reward-to-go,22,-21.23470879
+Reward-to-go,23,-34.42812729
+Reward-to-go,24,-10.92163086
+Reward-to-go,25,-27.5913868
+Reward-to-go,26,4.769751072
+Reward-to-go,27,-6.9490695
+Reward-to-go,28,-2.807855606
+Reward-to-go,29,-5.222572327
+Reward-to-go,30,-8.185805321
+Reward-to-go,31,-5.42165184
+Reward-to-go,32,-6.94751215
+Reward-to-go,33,-2.614720345
+Reward-to-go,34,6.402328491
+Reward-to-go,35,14.12906933
+Reward-to-go,36,22.41068268
+Reward-to-go,37,7.018059254
+Reward-to-go,38,7.515533924
+Reward-to-go,39,23.30374908
+Reward-to-go,40,27.49502373
+Reward-to-go,41,41.41695404
+Reward-to-go,42,40.68981934
+Reward-to-go,43,68.81332397
+Reward-to-go,44,57.4960022
+Reward-to-go,45,38.53574371
+Reward-to-go,46,24.84992027
+Reward-to-go,47,86.22503662
+Reward-to-go,48,71.88833618
+Reward-to-go,49,76.30662537
+Reward-to-go,50,55.50676346
+Reward-to-go,51,53.97146606
+Reward-to-go,52,74.05679321
+Reward-to-go,53,82.51686859
+Reward-to-go,54,94.37711334
+Reward-to-go,55,98.5173111
+Reward-to-go,56,87.87589264
+Reward-to-go,57,107.7754288
+Reward-to-go,58,106.6996841
+Reward-to-go,59,96.31983185
+Reward-to-go,60,93.89554596
+Reward-to-go,61,135.5444336
+Reward-to-go,62,97.97246552
+Reward-to-go,63,102.2815323
+Reward-to-go,64,113.4391861
+Reward-to-go,65,115.0717545
+Reward-to-go,66,107.5195313
+Reward-to-go,67,138.348465
+Reward-to-go,68,117.0512085
+Reward-to-go,69,130.3752594
+Reward-to-go,70,119.3758774
+Reward-to-go,71,130.8361206
+Reward-to-go,72,127.9690323
+Reward-to-go,73,125.5296936
+Reward-to-go,74,115.6062622
+Reward-to-go,75,117.6819534
+Reward-to-go,76,118.255249
+Reward-to-go,77,139.3585815
+Reward-to-go,78,141.7078705
+Reward-to-go,79,115.7546387
+Reward-to-go,80,116.6654129
+Reward-to-go,81,137.4176178
+Reward-to-go,82,124.5395737
+Reward-to-go,83,139.2317352
+Reward-to-go,84,146.5258636
+Reward-to-go,85,150.7653198
+Reward-to-go,86,107.3805771
+Reward-to-go,87,94.65518951
+Reward-to-go,88,119.903511
+Reward-to-go,89,121.2418518
+Reward-to-go,90,144.6453247
+Reward-to-go,91,147.0126953
+Reward-to-go,92,130.4984283
+Reward-to-go,93,144.3946075
+Reward-to-go,94,148.2525482
+Reward-to-go,95,149.4159241
+Reward-to-go,96,151.7266846
+Reward-to-go,97,129.7655182
+Reward-to-go,98,129.4089203
+Reward-to-go,99,142.0622406
+Reward-to-go,100,132.1208954
+Value Network,1,-129.2576141
+Value Network,2,-78.98179626
+Value Network,3,-113.3032532
+Value Network,4,-83.44395447
+Value Network,5,-97.43558502
+Value Network,6,-80.28848267
+Value Network,7,-85.13672638
+Value Network,8,-99.61249542
+Value Network,9,-106.392952
+Value Network,10,-68.02825165
+Value Network,11,-96.37050629
+Value Network,12,-87.46689606
+Value Network,13,-61.23845291
+Value Network,14,-78.5981369
+Value Network,15,-28.176054
+Value Network,16,-62.4367981
+Value Network,17,-90.78025055
+Value Network,18,-46.59570694
+Value Network,19,-47.57252121
+Value Network,20,-46.66419601
+Value Network,21,-35.46627426
+Value Network,22,-88.91042328
+Value Network,23,-66.14804077
+Value Network,24,-58.3412323
+Value Network,25,-96.6901474
+Value Network,26,-52.59608078
+Value Network,27,-72.61987305
+Value Network,28,-67.53391266
+Value Network,29,-33.53731155
+Value Network,30,-50.47102356
+Value Network,31,-74.69820404
+Value Network,32,-74.79322052
+Value Network,33,-51.65543747
+Value Network,34,-79.26137543
+Value Network,35,-63.58704758
+Value Network,36,-45.46484375
+Value Network,37,-55.21146774
+Value Network,38,-50.4811554
+Value Network,39,-57.49510574
+Value Network,40,-58.45298386
+Value Network,41,-41.04961014
+Value Network,42,-62.64518738
+Value Network,43,-29.6605587
+Value Network,44,-67.94415283
+Value Network,45,-39.59144211
+Value Network,46,-32.15111542
+Value Network,47,-76.33545685
+Value Network,48,-63.31292725
+Value Network,49,-16.51049614
+Value Network,50,-78.25540924
+Value Network,51,-35.57692337
+Value Network,52,22.61181641
+Value Network,53,-96.10002899
+Value Network,54,-35.23756409
+Value Network,55,-10.39861202
+Value Network,56,-57.65615845
+Value Network,57,-74.57435608
+Value Network,58,-71.89662933
+Value Network,59,-46.67943192
+Value Network,60,-64.67948151
+Value Network,61,-46.65958023
+Value Network,62,-45.00869751
+Value Network,63,-46.10654831
+Value Network,64,-41.54748917
+Value Network,65,-57.54561234
+Value Network,66,-40.76545334
+Value Network,67,-47.66566086
+Value Network,68,-31.65729713
+Value Network,69,-11.41422749
+Value Network,70,-22.68723869
+Value Network,71,-27.41484833
+Value Network,72,-13.49423695
+Value Network,73,-33.0659523
+Value Network,74,-28.42977715
+Value Network,75,-7.801038265
+Value Network,76,-34.55817032
+Value Network,77,-16.96997261
+Value Network,78,-4.657100201
+Value Network,79,-22.73467445
+Value Network,80,-21.2236557
+Value Network,81,-28.70906258
+Value Network,82,-30.77677345
+Value Network,83,-28.00794029
+Value Network,84,-30.28922081
+Value Network,85,-24.26722145
+Value Network,86,-19.46401215
+Value Network,87,-22.53429604
+Value Network,88,3.325704575
+Value Network,89,9.744707108
+Value Network,90,-11.80191898
+Value Network,91,6.312282562
+Value Network,92,-14.46309948
+Value Network,93,-8.66455555
+Value Network,94,1.029930711
+Value Network,95,-6.69536972
+Value Network,96,-23.097435
+Value Network,97,-29.17413521
+Value Network,98,25.45166206
+Value Network,99,46.90281296
+Value Network,100,25.53904724
+Reward-to-go + Value Network,1,-91.46567535
+Reward-to-go + Value Network,2,-100.5631332
+Reward-to-go + Value Network,3,-71.48649597
+Reward-to-go + Value Network,4,-62.49198532
+Reward-to-go + Value Network,5,-46.14775085
+Reward-to-go + Value Network,6,-53.25955582
+Reward-to-go + Value Network,7,-67.55838776
+Reward-to-go + Value Network,8,-60.68984604
+Reward-to-go + Value Network,9,-51.73097229
+Reward-to-go + Value Network,10,-34.69716263
+Reward-to-go + Value Network,11,-35.1336937
+Reward-to-go + Value Network,12,-61.64345169
+Reward-to-go + Value Network,13,-12.95694447
+Reward-to-go + Value Network,14,-29.91544533
+Reward-to-go + Value Network,15,-6.563743114
+Reward-to-go + Value Network,16,-41.06267166
+Reward-to-go + Value Network,17,-34.2426796
+Reward-to-go + Value Network,18,-15.71415043
+Reward-to-go + Value Network,19,-8.752334595
+Reward-to-go + Value Network,20,-1.644154906
+Reward-to-go + Value Network,21,-29.31488228
+Reward-to-go + Value Network,22,18.87790108
+Reward-to-go + Value Network,23,-27.28022957
+Reward-to-go + Value Network,24,-7.34245348
+Reward-to-go + Value Network,25,11.07847881
+Reward-to-go + Value Network,26,30.10455894
+Reward-to-go + Value Network,27,4.675056458
+Reward-to-go + Value Network,28,8.830212593
+Reward-to-go + Value Network,29,-11.13077068
+Reward-to-go + Value Network,30,21.9034729
+Reward-to-go + Value Network,31,-1.044249177
+Reward-to-go + Value Network,32,5.092803478
+Reward-to-go + Value Network,33,5.315100193
+Reward-to-go + Value Network,34,9.133271217
+Reward-to-go + Value Network,35,24.51206017
+Reward-to-go + Value Network,36,9.361865997
+Reward-to-go + Value Network,37,19.76953316
+Reward-to-go + Value Network,38,17.06318474
+Reward-to-go + Value Network,39,19.36828423
+Reward-to-go + Value Network,40,54.03194046
+Reward-to-go + Value Network,41,52.45355606
+Reward-to-go + Value Network,42,53.17764282
+Reward-to-go + Value Network,43,57.08665466
+Reward-to-go + Value Network,44,74.27978516
+Reward-to-go + Value Network,45,79.19478607
+Reward-to-go + Value Network,46,99.25566864
+Reward-to-go + Value Network,47,97.990242
+Reward-to-go + Value Network,48,96.92789459
+Reward-to-go + Value Network,49,128.460022
+Reward-to-go + Value Network,50,168.7262726
+Reward-to-go + Value Network,51,186.3538818
+Reward-to-go + Value Network,52,166.2017822
+Reward-to-go + Value Network,53,201.3448944
+Reward-to-go + Value Network,54,142.0224457
+Reward-to-go + Value Network,55,160.1525879
+Reward-to-go + Value Network,56,168.6667023
+Reward-to-go + Value Network,57,137.2141571
+Reward-to-go + Value Network,58,110.9897079
+Reward-to-go + Value Network,59,179.7590332
+Reward-to-go + Value Network,60,215.9367218
+Reward-to-go + Value Network,61,192.3304291
+Reward-to-go + Value Network,62,150.4942169
+Reward-to-go + Value Network,63,172.2220917
+Reward-to-go + Value Network,64,261.3752747
+Reward-to-go + Value Network,65,210.8046417
+Reward-to-go + Value Network,66,193.5364227
+Reward-to-go + Value Network,67,184.0580902
+Reward-to-go + Value Network,68,150.891037
+Reward-to-go + Value Network,69,221.8258514
+Reward-to-go + Value Network,70,200.8488312
+Reward-to-go + Value Network,71,292.0575867
+Reward-to-go + Value Network,72,232.6207733
+Reward-to-go + Value Network,73,244.7293243
+Reward-to-go + Value Network,74,272.6278381
+Reward-to-go + Value Network,75,282.1592102
+Reward-to-go + Value Network,76,228.7063446
+Reward-to-go + Value Network,77,245.2739716
+Reward-to-go + Value Network,78,290.5405273
+Reward-to-go + Value Network,79,264.3020325
+Reward-to-go + Value Network,80,257.0339661
+Reward-to-go + Value Network,81,245.7873077
+Reward-to-go + Value Network,82,211.0793915
+Reward-to-go + Value Network,83,268.9727783
+Reward-to-go + Value Network,84,252.144577
+Reward-to-go + Value Network,85,303.0178833
+Reward-to-go + Value Network,86,333.3194885
+Reward-to-go + Value Network,87,236.7071075
+Reward-to-go + Value Network,88,291.1212463
+Reward-to-go + Value Network,89,337.6007996
+Reward-to-go + Value Network,90,358.2155762
+Reward-to-go + Value Network,91,307.1582947
+Reward-to-go + Value Network,92,351.9905701
+Reward-to-go + Value Network,93,294.0690002
+Reward-to-go + Value Network,94,280.0187073
+Reward-to-go + Value Network,95,287.6257019
+Reward-to-go + Value Network,96,296.2308655
+Reward-to-go + Value Network,97,328.4362793
+Reward-to-go + Value Network,98,301.3631592
+Reward-to-go + Value Network,99,228.5990753
+Reward-to-go + Value Network,100,246.5448456
