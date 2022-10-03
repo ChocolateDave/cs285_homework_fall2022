@@ -17,19 +17,19 @@ if you are running the assignment locally.
 
 The following files have blanks to be filled with your solutions from homework 1. The relevant sections are marked with `TODO: get this from hw1 or hw2`.
 
-- [infrastructure/rl_trainer.py](cs285/infrastructure/rl_trainer.py)
-- [infrastructure/utils.py](cs285/infrastructure/utils.py)
-- [policies/MLP_policy.py](cs285/policies/MLP_policy.py)
+- [x] [infrastructure/rl_trainer.py](cs285/infrastructure/rl_trainer.py)
+- [x] [infrastructure/utils.py](cs285/infrastructure/utils.py)
+- [x] [policies/MLP_policy.py](cs285/policies/MLP_policy.py)
 
 You will then need to implement new routines in the following files for homework 3 part 1 (Q-learning):
-- [agents/dqn_agent.py](cs285/agents/dqn_agent.py)
-- [critics/dqn_critic.py](cs285/critics/dqn_critic.py)
-- [policies/argmax_policy.py](cs285/policies/argmax_policy.py)
+- [ ] [agents/dqn_agent.py](cs285/agents/dqn_agent.py)
+- [ ] [critics/dqn_critic.py](cs285/critics/dqn_critic.py)
+- [ ][policies/argmax_policy.py](cs285/policies/argmax_policy.py)
 
 and in the following files for part 2 (actor-critic):
-- [agents/ac_agent.py](cs285/agents/ac_agent.py)
-- [critics/bootstrapped_continuous_critic.py](cs285/critics/bootstrapped_continuous_critic.py)
-- [policies/MLP_policy.py](cs285/policies/MLP_policy.py)
+- [ ] [agents/ac_agent.py](cs285/agents/ac_agent.py)
+- [ ] [critics/bootstrapped_continuous_critic.py](cs285/critics/bootstrapped_continuous_critic.py)
+- [ ] [policies/MLP_policy.py](cs285/policies/MLP_policy.py)
 
 The relevant sections are marked with `TODO`.
 

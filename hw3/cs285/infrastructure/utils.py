@@ -1,11 +1,14 @@
+from typing import List, Mapping
 import numpy as np
 import time
 import copy
 
-############################################
-############################################
 
-def calculate_mean_prediction_error(env, action_sequence, models, data_statistics):
+############################################
+############################################
+def calculate_mean_prediction_error(
+    env, action_sequence, models, data_statistics
+):
 
     model = models[0]
 
@@ -13,11 +16,11 @@ def calculate_mean_prediction_error(env, action_sequence, models, data_statistic
     true_states = perform_actions(env, action_sequence)['observation']
 
     # predicted
-    ob = np.expand_dims(true_states[0],0)
+    ob = np.expand_dims(true_states[0], 0)
     pred_states = []
     for ac in action_sequence:
         pred_states.append(ob)
-        action = np.expand_dims(ac,0)
+        action = np.expand_dims(ac, 0)
         ob = model.get_prediction(ob, action, data_statistics)
     pred_states = np.squeeze(pred_states)
 
@@ -25,6 +28,7 @@ def calculate_mean_prediction_error(env, action_sequence, models, data_statistic
     mpe = mean_squared_error(pred_states, true_states)
 
     return mpe, true_states, pred_states
+
 
 def perform_actions(env, actions):
     ob = env.reset()
@@ -48,35 +52,100 @@ def perform_actions(env, actions):
 
     return Path(obs, image_obs, acs, rewards, next_obs, terminals)
 
+
 def mean_squared_error(a, b):
     return np.mean((a-b)**2)
 
+
 ############################################
 ############################################
+def sample_trajectory(
+    env, policy, max_path_length, render=False, render_mode=('rgb_array')
+):
+    # Initialize env for the beginning of a new rollout
+    ob = env.reset()
 
-def sample_trajectory(env, policy, max_path_length, render=False, render_mode=('rgb_array')):
-    # TODO: get this from hw1 or hw2
+    # Initialize variables
+    obs, acs, rewards, next_obs, terminals, image_obs = [], [], [], [], [], []
+    steps = 0
+    while True:
 
-def sample_trajectories(env, policy, min_timesteps_per_batch, max_path_length, render=False, render_mode=('rgb_array')):
+        # Render image of the simulation environment
+        if render:
+            if hasattr(env, 'sim'):
+                image_obs.append(env.sim.render(camera_name='track',
+                                                height=500,
+                                                width=500)[::-1])
+            else:
+                image_obs.append(env.render())
+
+        # Use the most recent obs to decide what to do
+        obs.append(ob)
+        ac = policy.get_action(ob)
+        ac = ac[0]
+        acs.append(ac)
+
+        # Take that action and record transition
+        try:
+            ob, rew, done, _ = env.step(ac)
+        except Exception as e:
+            raise RuntimeError(f"{e}, ac={ac}")
+
+        # Record result of taking that action
+        steps += 1
+        next_obs.append(ob)
+        rewards.append(rew)
+
+        rollout_done = done or steps == max_path_length
+        terminals.append(rollout_done)
+
+        if rollout_done:
+            break
+
+    return Path(obs, image_obs, acs, rewards, next_obs, terminals)
+
+
+def sample_trajectories(
+    env, policy, min_timesteps_per_batch, max_path_length,
+    render=False, render_mode=('rgb_array')
+):
     """
         Collect rollouts using policy
         until we have collected min_timesteps_per_batch steps
     """
-    # TODO: get this from hw1 or hw2
+    timesteps_this_batch = 0
+    paths: List[Mapping[str, np.ndarray]] = []
+    while timesteps_this_batch < min_timesteps_per_batch:
+        path: Mapping[str, np.ndarray] = sample_trajectory(
+            env, policy, max_path_length, render, render_mode
+        )
+        paths.append(path)
+        timesteps_this_batch += get_pathlength(path)
 
     return paths, timesteps_this_batch
 
-def sample_n_trajectories(env, policy, ntraj, max_path_length, render=False, render_mode=('rgb_array')):
+
+def sample_n_trajectories(
+    env, policy, ntraj, max_path_length,
+    render=False, render_mode=('rgb_array')
+):
     """
         Collect ntraj rollouts using policy
     """
-    # TODO: get this from hw1 or hw2
+    paths = []
+    cntr: int = 0
+    while cntr < ntraj:
+        path = sample_trajectory(
+            env, policy, max_path_length, render, render_mode
+        )
+        paths.append(path)
+        cntr += 1
 
     return paths
 
-############################################
-############################################
 
+############################################
+############################################
 def Path(obs, image_obs, acs, rewards, next_obs, terminals):
     """
         Take info (separate arrays) from a single rollout
@@ -84,10 +153,10 @@ def Path(obs, image_obs, acs, rewards, next_obs, terminals):
     """
     if image_obs != []:
         image_obs = np.stack(image_obs, axis=0)
-    return {"observation" : np.array(obs, dtype=np.float32),
-            "image_obs" : np.array(image_obs, dtype=np.uint8),
-            "reward" : np.array(rewards, dtype=np.float32),
-            "action" : np.array(acs, dtype=np.float32),
+    return {"observation": np.array(obs, dtype=np.float32),
+            "image_obs": np.array(image_obs, dtype=np.uint8),
+            "reward": np.array(rewards, dtype=np.float32),
+            "action": np.array(acs, dtype=np.float32),
             "next_observation": np.array(next_obs, dtype=np.float32),
             "terminal": np.array(terminals, dtype=np.float32)}
 
@@ -96,41 +165,52 @@ def convert_listofrollouts(paths):
     """
         Take a list of rollout dictionaries
         and return separate arrays,
-        where each array is a concatenation of that array from across the rollouts
+        where each array is a concatenation of
+        that array from across the rollouts
     """
     observations = np.concatenate([path["observation"] for path in paths])
     actions = np.concatenate([path["action"] for path in paths])
-    next_observations = np.concatenate([path["next_observation"] for path in paths])
+    next_observations = np.concatenate(
+        [path["next_observation"] for path in paths]
+    )
     terminals = np.concatenate([path["terminal"] for path in paths])
-    concatenated_rewards = np.concatenate([path["reward"] for path in paths])
+    concatenated_rewards = np.concatenate(
+        [path["reward"] for path in paths]
+    )
     unconcatenated_rewards = [path["reward"] for path in paths]
-    return observations, actions, next_observations, terminals, concatenated_rewards, unconcatenated_rewards
+    return (
+        observations, actions, next_observations, terminals,
+        concatenated_rewards, unconcatenated_rewards
+    )
+
 
 ############################################
 ############################################
-
 def get_pathlength(path):
     return len(path["reward"])
 
-def normalize(data, mean, std, eps=1e-8):
-    return (data-mean)/(std+eps)
 
-def unnormalize(data, mean, std):
-    return data*std+mean
+def normalize(data, mean, std, eps=1e-8):
+    return (data - mean) / (std + eps)
+
+
+def unnormalize(data, mean, std, eps=1e-8):
+    return data * (std + eps) + mean
+
 
 def add_noise(data_inp, noiseToSignal=0.01):
 
-    data = copy.deepcopy(data_inp) #(num data points, dim)
+    data = copy.deepcopy(data_inp)  # (num data points, dim)
 
-    #mean of data
+    # mean of data
     mean_data = np.mean(data, axis=0)
 
-    #if mean is 0,
-    #make it 0.001 to avoid 0 issues later for dividing by std
+    # if mean is 0,
+    # make it 0.001 to avoid 0 issues later for dividing by std
     mean_data[mean_data == 0] = 0.000001
 
-    #width of normal distribution to sample noise from
-    #larger magnitude number = could have larger magnitude noise
+    # width of normal distribution to sample noise from
+    # larger magnitude number = could have larger magnitude noise
     std_of_noise = mean_data * noiseToSignal
     for j in range(mean_data.shape[0]):
         data[:, j] = np.copy(data[:, j] + np.random.normal(
@@ -138,12 +218,13 @@ def add_noise(data_inp, noiseToSignal=0.01):
 
     return data
 
-############################################
+
 ############################################
 # New for SAC
 ############################################
-############################################
-def eval_trajectory(env, policy, max_path_length, render=False, render_mode=('rgb_array')):
+def eval_trajectory(
+    env, policy, max_path_length, render=False, render_mode=('rgb_array')
+):
     ob = env.reset()
     obs, acs, rewards, next_obs, terminals, image_obs = [], [], [], [], [], []
     steps = 0
@@ -152,9 +233,15 @@ def eval_trajectory(env, policy, max_path_length, render=False, render_mode=('rg
             if 'rgb_array' in render_mode:
                 if hasattr(env, 'sim'):
                     if 'track' in env.env.model.camera_names:
-                        image_obs.append(env.sim.render(camera_name='track', height=500, width=500)[::-1])
+                        image_obs.append(
+                            env.sim.render(
+                                camera_name='track', height=500, width=500
+                            )[::-1]
+                        )
                     else:
-                        image_obs.append(env.sim.render(height=500, width=500)[::-1])
+                        image_obs.append(
+                            env.sim.render(height=500, width=500)[::-1]
+                        )
                 else:
                     image_obs.append(env.render(mode=render_mode))
             if 'human' in render_mode:
@@ -179,7 +266,11 @@ def eval_trajectory(env, policy, max_path_length, render=False, render_mode=('rg
 
     return Path(obs, image_obs, acs, rewards, next_obs, terminals)
 
-def eval_trajectories(env, policy, min_timesteps_per_batch, max_path_length, render=False, render_mode=('rgb_array')):
+
+def eval_trajectories(
+    env, policy, min_timesteps_per_batch, max_path_length,
+    render=False, render_mode=('rgb_array')
+):
     """
         Collect rollouts using policy
         until we have collected min_timesteps_per_batch steps
@@ -188,17 +279,25 @@ def eval_trajectories(env, policy, min_timesteps_per_batch, max_path_length, ren
     paths = []
     while timesteps_this_batch < min_timesteps_per_batch:
 
-        #collect rollout
-        path = eval_trajectory(env, policy, max_path_length, render, render_mode)
+        # collect rollout
+        path = eval_trajectory(
+            env, policy, max_path_length, render, render_mode
+        )
         paths.append(path)
 
-        #count steps
+        # count steps
         timesteps_this_batch += get_pathlength(path)
-        print('At timestep:    ', timesteps_this_batch, '/', min_timesteps_per_batch, end='\r')
+        print(
+            'At timestep:    ', timesteps_this_batch, '/',
+            min_timesteps_per_batch, end='\r'
+        )
+
     return paths, timesteps_this_batch
 
 
-def sample_random_trajectory(env, max_path_length, render=False, render_mode=('rgb_array')):
+def sample_random_trajectory(
+    env, max_path_length, render=False, render_mode=('rgb_array')
+):
     ob = env.reset()
     obs, acs, rewards, next_obs, terminals, image_obs = [], [], [], [], [], []
     steps = 0
@@ -207,9 +306,15 @@ def sample_random_trajectory(env, max_path_length, render=False, render_mode=('r
             if 'rgb_array' in render_mode:
                 if hasattr(env, 'sim'):
                     if 'track' in env.env.model.camera_names:
-                        image_obs.append(env.sim.render(camera_name='track', height=500, width=500)[::-1])
+                        image_obs.append(
+                            env.sim.render(
+                                camera_name='track', height=500, width=500
+                            )[::-1]
+                        )
                     else:
-                        image_obs.append(env.sim.render(height=500, width=500)[::-1])
+                        image_obs.append(
+                            env.sim.render(height=500, width=500)[::-1]
+                        )
                 else:
                     image_obs.append(env.render(mode=render_mode))
             if 'human' in render_mode:
@@ -233,7 +338,11 @@ def sample_random_trajectory(env, max_path_length, render=False, render_mode=('r
 
     return Path(obs, image_obs, acs, rewards, next_obs, terminals)
 
-def sample_random_trajectories(env, min_timesteps_per_batch, max_path_length, render=False, render_mode=('rgb_array')):
+
+def sample_random_trajectories(
+    env, min_timesteps_per_batch, max_path_length,
+    render=False, render_mode=('rgb_array')
+):
     """
         Collect rollouts using policy
         until we have collected min_timesteps_per_batch steps
@@ -241,12 +350,17 @@ def sample_random_trajectories(env, min_timesteps_per_batch, max_path_length, re
     timesteps_this_batch = 0
     paths = []
     while timesteps_this_batch < min_timesteps_per_batch:
-        #collect rollout
-        path = sample_random_trajectory(env, max_path_length, render, render_mode)
+        # collect rollout
+        path = sample_random_trajectory(
+            env, max_path_length, render, render_mode
+        )
         paths.append(path)
 
-        #count steps
+        # count steps
         timesteps_this_batch += get_pathlength(path)
-        print('At timestep:    ', timesteps_this_batch, '/', min_timesteps_per_batch, end='\r')
-    return paths, timesteps_this_batch
+        print(
+            'At timestep:    ', timesteps_this_batch, '/',
+            min_timesteps_per_batch, end='\r'
+        )
 
+    return paths, timesteps_this_batch
