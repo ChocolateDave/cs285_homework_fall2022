@@ -43,16 +43,20 @@ class DQNCritic(BaseCritic):
     def update(self, ob_no, ac_na, next_ob_no, reward_n, terminal_n):
         """
             Update the parameters of the critic.
-            let sum_of_path_lengths be the sum of the lengths of the paths sampled from
-                Agent.sample_trajectories
-            let num_paths be the number of paths sampled from Agent.sample_trajectories
+            let `sum_of_path_lengths` be the sum of the lengths of the paths
+            sampled from `Agent.sample_trajectories`
+            let `num_paths` be the number of paths sampled from
+            `Agent.sample_trajectories`
             arguments:
                 ob_no: shape: (sum_of_path_lengths, ob_dim)
-                next_ob_no: shape: (sum_of_path_lengths, ob_dim). The observation after taking one step forward
-                reward_n: length: sum_of_path_lengths. Each element in reward_n is a scalar containing
-                    the reward for each timestep
-                terminal_n: length: sum_of_path_lengths. Each element in terminal_n is either 1 if the episode ended
-                    at that timestep of 0 if the episode did not end
+                next_ob_no: shape: (sum_of_path_lengths, ob_dim).
+                The observation after taking one step forward
+                reward_n: length: sum_of_path_lengths.
+                Each element in reward_n is a scalar containing
+                the reward for each timestep
+                terminal_n: length: sum_of_path_lengths.
+                Each element in `terminal_n` is either 1 if the episode ended
+                at that timestep of 0 if the episode did not end
             returns:
                 nothing
         """
@@ -63,25 +67,33 @@ class DQNCritic(BaseCritic):
         terminal_n = ptu.from_numpy(terminal_n)
 
         qa_t_values = self.q_net(ob_no)
-        q_t_values = torch.gather(qa_t_values, 1, ac_na.unsqueeze(1)).squeeze(1)
-        
-        # TODO compute the Q-values from the target network 
-        qa_tp1_values = TODO
+        q_t_values = torch.gather(
+            qa_t_values, 1, ac_na.unsqueeze(1)
+        ).squeeze(1)
+
+        # Compute the Q-values of the next observation with the target network
+        qa_tp1_values = self.q_net_target(next_ob_no)
 
         if self.double_q:
-            # You must fill this part for Q2 of the Q-learning portion of the homework.
-            # In double Q-learning, the best action is selected using the Q-network that
-            # is being updated, but the Q-value for this action is obtained from the
-            # target Q-network. Please review Lecture 8 for more details,
-            # and page 4 of https://arxiv.org/pdf/1509.06461.pdf is also a good reference.
-            TODO
+            # You must fill this part for the Q2 of the Q-learning portion
+            # of the homework.
+            # In double Q-learning, the best action is selected using the
+            # Q-network that is being updated, but the Q-value for this action
+            # is obtained from the target Q-network.
+            # Please review Lecture 8 for more details, and page 4 of
+            # https://arxiv.org/pdf/1509.06461.pdf is also a good reference.
+            q_tp1 = torch.gather(
+                input=qa_tp1_values,
+                dim=1,
+                index=self.q_net(next_ob_no).argmax(dim=1).unsqueeze(1)
+            ).squeeze(1)
         else:
             q_tp1, _ = qa_tp1_values.max(dim=1)
 
-        # TODO compute targets for minimizing Bellman error
+        # Compute targets for minimizing Bellman error
         # HINT: as you saw in lecture, this would be:
-            #currentReward + self.gamma * qValuesOfNextTimestep * (not terminal)
-        target = TODO
+        # currentReward + self.gamma * qValuesOfNextTimestep * (not terminal)
+        target = reward_n + self.gamma * q_tp1 * (1 - terminal_n)
         target = target.detach()
 
         assert q_t_values.shape == target.shape
@@ -89,7 +101,9 @@ class DQNCritic(BaseCritic):
 
         self.optimizer.zero_grad()
         loss.backward()
-        utils.clip_grad_value_(self.q_net.parameters(), self.grad_norm_clipping)
+        utils.clip_grad_value_(
+            self.q_net.parameters(), self.grad_norm_clipping
+        )
         self.optimizer.step()
 
         return {
