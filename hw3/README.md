@@ -22,9 +22,9 @@ The following files have blanks to be filled with your solutions from homework 1
 - [x] [policies/MLP_policy.py](cs285/policies/MLP_policy.py)
 
 You will then need to implement new routines in the following files for homework 3 part 1 (Q-learning):
-- [ ] [agents/dqn_agent.py](cs285/agents/dqn_agent.py)
-- [ ] [critics/dqn_critic.py](cs285/critics/dqn_critic.py)
-- [ ][policies/argmax_policy.py](cs285/policies/argmax_policy.py)
+- [x] [agents/dqn_agent.py](cs285/agents/dqn_agent.py)
+- [x] [critics/dqn_critic.py](cs285/critics/dqn_critic.py)
+- [x] [policies/argmax_policy.py](cs285/policies/argmax_policy.py)
 
 and in the following files for part 2 (actor-critic):
 - [ ] [agents/ac_agent.py](cs285/agents/ac_agent.py)
