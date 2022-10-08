@@ -108,7 +108,7 @@ class MLPPolicySAC(MLPPolicy):
         actor_q = torch.minimum(*critic.forward(obs, action))
 
         # Policy loss
-        actor_loss = (self.alpha.detach() * entropy - actor_q).mean()
+        actor_loss = (self.alpha * entropy - actor_q).mean()
         actor_loss.backward()
         self.optimizer.step()
 
