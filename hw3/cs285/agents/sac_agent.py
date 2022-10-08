@@ -59,11 +59,11 @@ class SACAgent(BaseAgent):
         target_qs = torch.minimum(
             *self.critic_target.forward(next_ob_no, next_ac_na)
         )
-        log_prob = policy.log_prob(next_ac_na)
+        entropy = policy.log_prob(next_ac_na).mean(-1, keepdim=True)
         target: torch.Tensor = \
-            re_n + self.gamma * (1 - terminal_n.unsqueeze(-1)) * (
+            re_n + self.gamma * (1 - terminal_n) * (
                 target_qs -
-                self.actor.alpha.detach() * log_prob
+                self.actor.alpha.detach() * entropy
             )
 
         # 2. Get current Q estimates and calculate critic loss
@@ -87,9 +87,9 @@ class SACAgent(BaseAgent):
             critic_loss = self.update_critic(
                 ob_no=ptu.from_numpy(ob_no),
                 ac_na=ptu.from_numpy(ac_na),
-                re_n=ptu.from_numpy(re_n),
+                re_n=ptu.from_numpy(re_n).unsqueeze(-1),
                 next_ob_no=ptu.from_numpy(next_ob_no),
-                terminal_n=ptu.from_numpy(terminal_n)
+                terminal_n=ptu.from_numpy(terminal_n).unsqueeze(-1)
             )
 
         # 2. Softly update the target every critic_target_update_frequency
