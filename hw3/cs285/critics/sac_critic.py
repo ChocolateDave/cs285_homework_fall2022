@@ -6,6 +6,7 @@ from cs285.infrastructure import pytorch_util as ptu
 from cs285.infrastructure import sac_utils
 import torch
 
+
 class SACCritic(nn.Module, BaseCritic):
     """
         Notes on notation:
@@ -57,4 +58,3 @@ class SACCritic(nn.Module, BaseCritic):
     def forward(self, obs: torch.Tensor, action: torch.Tensor):
         # TODO: return the two q values
         return values
-        

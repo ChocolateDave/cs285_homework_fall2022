@@ -3,13 +3,14 @@ from collections import OrderedDict
 from cs285.critics.bootstrapped_continuous_critic import \
     BootstrappedContinuousCritic
 from cs285.infrastructure.replay_buffer import ReplayBuffer
-from cs285.infrastructure.utils import *
+from cs285.infrastructure.utils import copy
 from cs285.policies.MLP_policy import MLPPolicyAC
 from .base_agent import BaseAgent
 import gym
 from cs285.policies.sac_policy import MLPPolicySAC
 from cs285.critics.sac_critic import SACCritic
 import cs285.infrastructure.pytorch_util as ptu
+
 
 class SACAgent(BaseAgent):
     def __init__(self, env: gym.Env, agent_params):
@@ -35,8 +36,12 @@ class SACAgent(BaseAgent):
             action_range=self.action_range,
             init_temperature=self.agent_params['init_temperature']
         )
-        self.actor_update_frequency = self.agent_params['actor_update_frequency']
-        self.critic_target_update_frequency = self.agent_params['critic_target_update_frequency']
+        self.actor_update_frequency = self.agent_params[
+            'actor_update_frequency'
+        ]
+        self.critic_target_update_frequency = self.agent_params[
+            'critic_target_update_frequency'
+        ]
 
         self.critic = SACCritic(self.agent_params)
         self.critic_target = copy.deepcopy(self.critic).to(ptu.device)
@@ -46,11 +51,13 @@ class SACAgent(BaseAgent):
         self.replay_buffer = ReplayBuffer(max_size=100000)
 
     def update_critic(self, ob_no, ac_na, next_ob_no, re_n, terminal_n):
-        # TODO: 
-        # 1. Compute the target Q value. 
+        # TODO:
+        # 1. Compute the target Q value.
         # HINT: You need to use the entropy term (alpha)
+
         # 2. Get current Q estimates and calculate critic loss
-        # 3. Optimize the critic  
+
+        # 3. Optimize the critic
         return critic_loss
 
     def train(self, ob_no, ac_na, re_n, next_ob_no, terminal_n):

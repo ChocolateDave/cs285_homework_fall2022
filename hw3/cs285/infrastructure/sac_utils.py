@@ -9,6 +9,7 @@ def soft_update_params(net, target_net, tau):
         target_param.data.copy_(tau * param.data +
                                 (1 - tau) * target_param.data)
 
+
 class TanhTransform(dist.transforms.Transform):
     domain = dist.constraints.real
     codomain = dist.constraints.interval(-1.0, 1.0)

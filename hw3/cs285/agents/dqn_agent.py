@@ -1,8 +1,7 @@
 import gym
 import numpy as np
 
-from cs285.infrastructure.dqn_utils import (MemoryOptimizedReplayBuffer,
-                                            PiecewiseSchedule)  # noqa:F401
+from cs285.infrastructure.dqn_utils import MemoryOptimizedReplayBuffer
 from cs285.policies.argmax_policy import ArgMaxPolicy
 from cs285.critics.dqn_critic import DQNCritic
 

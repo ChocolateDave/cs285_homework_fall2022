@@ -17,10 +17,7 @@ from cs285.infrastructure.logger import Logger
 
 from cs285.agents.dqn_agent import DQNAgent
 from cs285.agents.sac_agent import SACAgent  # noqa: F401
-from cs285.infrastructure.dqn_utils import (
-        get_wrapper_by_name,
-        register_custom_envs,
-)  # noqa:F401
+from cs285.infrastructure.dqn_utils import register_custom_envs
 
 # how many rollouts to save as videos to tensorboard
 MAX_NVIDEO = 2
@@ -55,7 +52,10 @@ class RL_Trainer(object):
         # Make the gym environment
         register_custom_envs()
         if self.params['agent_class'] is SACAgent:
-            self.env = gym.make(self.params['env_name'], max_episode_steps=self.params['ep_len'])
+            self.env = gym.make(
+                self.params['env_name'],
+                max_episode_steps=self.params['ep_len']
+            )
         else:
             self.env = gym.make(self.params['env_name'])
         if self.params['video_log_freq'] > 0:

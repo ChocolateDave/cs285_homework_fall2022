@@ -26,10 +26,15 @@ You will then need to implement new routines in the following files for homework
 - [x] [critics/dqn_critic.py](cs285/critics/dqn_critic.py)
 - [x] [policies/argmax_policy.py](cs285/policies/argmax_policy.py)
 
-and in the following files for part 2 (actor-critic):
+in the following files for part 2 (actor-critic):
 - [x] [agents/ac_agent.py](cs285/agents/ac_agent.py)
 - [x] [critics/bootstrapped_continuous_critic.py](cs285/critics/bootstrapped_continuous_critic.py)
 - [x] [policies/MLP_policy.py](cs285/policies/MLP_policy.py)
+
+and in the following files for part 3 (soft actor-critic):
+- [ ] [agents/sac_agent.py](cs285/agents/sac_agent.py)
+- [ ] [critics/sac_critic.py](cs285/critics/sac_critic.py)
+- [ ] [policies/sac_policy.py](cs285/policies/sac_policy.py)
 
 The relevant sections are marked with `TODO`.
 
