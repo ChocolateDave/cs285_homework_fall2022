@@ -12,10 +12,14 @@ class Q_Trainer(object):
         self.params = params
 
         train_args = {
-            'num_agent_train_steps_per_iter': params['num_agent_train_steps_per_iter'],
-            'num_critic_updates_per_agent_update': params['num_critic_updates_per_agent_update'],
-            'train_batch_size': params['batch_size'],
-            'double_q': params['double_q'],
+            'num_agent_train_steps_per_iter':
+                params['num_agent_train_steps_per_iter'],
+            'num_critic_updates_per_agent_update':
+                params['num_critic_updates_per_agent_update'],
+            'train_batch_size':
+                params['batch_size'],
+            'double_q':
+                params['double_q'],
         }
 
         env_args = get_env_kwargs(params['env_name'])
@@ -32,19 +36,19 @@ class Q_Trainer(object):
     def run_training_loop(self):
         self.rl_trainer.run_training_loop(
             self.agent_params['num_timesteps'],
-            collect_policy = self.rl_trainer.agent.actor,
-            eval_policy = self.rl_trainer.agent.actor,
+            collect_policy=self.rl_trainer.agent.actor,
+            eval_policy=self.rl_trainer.agent.actor,
         )
+
 
 def main():
 
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--env_name',
-        default='MsPacman-v0',
-        choices=('PongNoFrameskip-v4', 'LunarLander-v3', 'MsPacman-v0')
-    )
+    parser.add_argument('--env_name',
+                        default='MsPacman-v0',
+                        choices=('PongNoFrameskip-v4', 'LunarLander-v3',
+                                 'MsPacman-v0'))
 
     parser.add_argument('--ep_len', type=int, default=200)
     parser.add_argument('--exp_name', type=str, default='todo')
@@ -52,8 +56,12 @@ def main():
     parser.add_argument('--eval_batch_size', type=int, default=1000)
 
     parser.add_argument('--batch_size', type=int, default=32)
-    parser.add_argument('--num_agent_train_steps_per_iter', type=int, default=1)
-    parser.add_argument('--num_critic_updates_per_agent_update', type=int, default=1)
+    parser.add_argument('--num_agent_train_steps_per_iter',
+                        type=int,
+                        default=1)
+    parser.add_argument('--num_critic_updates_per_agent_update',
+                        type=int,
+                        default=1)
     parser.add_argument('--double_q', action='store_true')
 
     parser.add_argument('--seed', type=int, default=1)
@@ -68,20 +76,22 @@ def main():
 
     # convert to dictionary
     params = vars(args)
-    params['video_log_freq'] = -1 # This param is not used for DQN
-    ##################################
-    ### CREATE DIRECTORY FOR LOGGING
-    ##################################
+    params['video_log_freq'] = -1  # This param is not used for DQN
 
-    data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data')
+    ##################################
+    # CREATE DIRECTORY FOR LOGGING
+    ##################################
+    data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                             '../../data')
 
     if not (os.path.exists(data_path)):
         os.makedirs(data_path)
 
-    logdir = args.exp_name + '_' + args.env_name + '_' + time.strftime("%d-%m-%Y_%H-%M-%S")
+    logdir = args.exp_name + '_' + args.env_name + '_' + time.strftime(
+        "%d-%m-%Y_%H-%M-%S")
     logdir = os.path.join(data_path, logdir)
     params['logdir'] = logdir
-    if not(os.path.exists(logdir)):
+    if not (os.path.exists(logdir)):
         os.makedirs(logdir)
 
     print("\n\n\nLOGGING TO: ", logdir, "\n\n\n")
