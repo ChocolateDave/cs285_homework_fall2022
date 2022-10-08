@@ -112,7 +112,6 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         if self.discrete:
             logits = self.logits_na(observation)
             action_distribution = distributions.Categorical(logits=logits)
-            return action_distribution
         else:
             batch_mean: torch.Tensor = self.mean_net(observation)
             scale_tril = torch.diag(torch.exp(self.logstd))
@@ -130,7 +129,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 #####################################################
 class MLPPolicyAC(MLPPolicy):
     def update(self, observations, actions, adv_n=None):
-        # TODO: update the policy and return the loss
+        # Update the policy and return the loss
         self.optimizer.zero_grad()
 
         observations = ptu.from_numpy(observations)

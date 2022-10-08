@@ -10,7 +10,7 @@ class SAC_Trainer(object):
     def __init__(self, params):
 
         #####################
-        ## SET AGENT PARAMS
+        # SET AGENT PARAMS
         #####################
 
         computation_graph_args = {
@@ -19,20 +19,32 @@ class SAC_Trainer(object):
             'learning_rate': params['learning_rate'],
             'init_temperature': params['init_temperature'],
             'actor_update_frequency': params['actor_update_frequency'],
-            'critic_target_update_frequency': params['critic_target_update_frequency']
-            }
+            'critic_target_update_frequency': params[
+                'critic_target_update_frequency'
+            ]
+        }
 
         estimate_advantage_args = {
             'gamma': params['discount'],
         }
 
         train_args = {
-            'num_agent_train_steps_per_iter': params['num_agent_train_steps_per_iter'],
-            'num_critic_updates_per_agent_update': params['num_critic_updates_per_agent_update'],
-            'num_actor_updates_per_agent_update': params['num_actor_updates_per_agent_update'],
+            'num_agent_train_steps_per_iter': params[
+                'num_agent_train_steps_per_iter'
+            ],
+            'num_critic_updates_per_agent_update': params[
+                'num_critic_updates_per_agent_update'
+            ],
+            'num_actor_updates_per_agent_update': params[
+                'num_actor_updates_per_agent_update'
+            ],
         }
 
-        agent_params = {**computation_graph_args, **estimate_advantage_args, **train_args}
+        agent_params = {
+            **computation_graph_args,
+            **estimate_advantage_args,
+            **train_args
+        }
 
         self.params = params
         self.params['agent_class'] = SACAgent
@@ -40,7 +52,7 @@ class SAC_Trainer(object):
         self.params['batch_size_initial'] = self.params['batch_size']
 
         ################
-        ## RL TRAINER
+        # RL TRAINER
         ################
 
         self.rl_trainer = RL_Trainer(self.params)
@@ -48,9 +60,9 @@ class SAC_Trainer(object):
     def run_training_loop(self):
         self.rl_trainer.run_sac_training_loop(
             self.params['n_iter'],
-            collect_policy = self.rl_trainer.agent.actor,
-            eval_policy = self.rl_trainer.agent.actor,
-            )
+            collect_policy=self.rl_trainer.agent.actor,
+            eval_policy=self.rl_trainer.agent.actor,
+        )
 
 
 def main():
@@ -62,14 +74,21 @@ def main():
     parser.add_argument('--exp_name', type=str, default='todo')
     parser.add_argument('--n_iter', '-n', type=int, default=200)
 
-    parser.add_argument('--num_agent_train_steps_per_iter', type=int, default=1)
-    parser.add_argument('--num_critic_updates_per_agent_update', type=int, default=1)
-    parser.add_argument('--num_actor_updates_per_agent_update', type=int, default=1)
+    parser.add_argument('--num_agent_train_steps_per_iter',
+                        type=int, default=1)
+    parser.add_argument('--num_critic_updates_per_agent_update',
+                        type=int, default=1)
+    parser.add_argument('--num_actor_updates_per_agent_update',
+                        type=int, default=1)
     parser.add_argument('--actor_update_frequency', type=int, default=1)
-    parser.add_argument('--critic_target_update_frequency', type=int, default=1)
-    parser.add_argument('--batch_size', '-b', type=int, default=1000) #steps collected per train iteration
-    parser.add_argument('--eval_batch_size', '-eb', type=int, default=400) #steps collected per eval iteration
-    parser.add_argument('--train_batch_size', '-tb', type=int, default=256) ##steps used per gradient step
+    parser.add_argument('--critic_target_update_frequency',
+                        type=int, default=1)
+    # Steps collected per train iteration
+    parser.add_argument('--batch_size', '-b', type=int, default=1000)
+    # Steps collected per eval iteration
+    parser.add_argument('--eval_batch_size', '-eb', type=int, default=400)
+    # Steps used per gradient step
+    parser.add_argument('--train_batch_size', '-tb', type=int, default=256)
 
     parser.add_argument('--discount', type=float, default=0.99)
     parser.add_argument('--init_temperature', '-temp', type=float, default=1.0)
@@ -91,15 +110,22 @@ def main():
     params = vars(args)
 
     ##################################
-    ### CREATE DIRECTORY FOR LOGGING
+    # CREATE DIRECTORY FOR LOGGING
     ##################################
 
-    data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data')
+    data_path = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '../../data'
+    )
 
     if not (os.path.exists(data_path)):
         os.makedirs(data_path)
 
-    logdir = args.exp_name + '_' + args.env_name + '_' + time.strftime("%d-%m-%Y_%H-%M-%S")
+    logdir = '_'.join([
+        args.exp_name,
+        args.env_name,
+        time.strftime("%d-%m-%Y_%H-%M-%S")
+    ])
     logdir = os.path.join(data_path, logdir)
     params['logdir'] = logdir
     if not(os.path.exists(logdir)):
@@ -108,7 +134,7 @@ def main():
     print("\n\n\nLOGGING TO: ", logdir, "\n\n\n")
 
     ###################
-    ### RUN TRAINING
+    # RUN TRAINING
     ###################
 
     trainer = SAC_Trainer(params)

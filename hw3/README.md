@@ -32,9 +32,9 @@ in the following files for part 2 (actor-critic):
 - [x] [policies/MLP_policy.py](cs285/policies/MLP_policy.py)
 
 and in the following files for part 3 (soft actor-critic):
-- [ ] [agents/sac_agent.py](cs285/agents/sac_agent.py)
-- [ ] [critics/sac_critic.py](cs285/critics/sac_critic.py)
-- [ ] [policies/sac_policy.py](cs285/policies/sac_policy.py)
+- [x] [agents/sac_agent.py](cs285/agents/sac_agent.py)
+- [x] [critics/sac_critic.py](cs285/critics/sac_critic.py)
+- [x] [policies/sac_policy.py](cs285/policies/sac_policy.py)
 
 The relevant sections are marked with `TODO`.
 

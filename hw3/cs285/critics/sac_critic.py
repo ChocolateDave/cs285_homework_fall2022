@@ -1,9 +1,7 @@
 from .base_critic import BaseCritic
 from torch import nn
 from torch import optim
-import numpy as np
 from cs285.infrastructure import pytorch_util as ptu
-from cs285.infrastructure import sac_utils
 import torch
 
 
@@ -14,9 +12,9 @@ class SACCritic(nn.Module, BaseCritic):
         Prefixes and suffixes:
         ob - observation
         ac - action
-        _no - this tensor should have shape (batch self.size /n/, observation dim)
-        _na - this tensor should have shape (batch self.size /n/, action dim)
-        _n  - this tensor should have shape (batch self.size /n/)
+        _no - this tensor have shape (batch self.size /n/, observation dim)
+        _na - this tensor have shape (batch self.size /n/, action dim)
+        _n  - this tensor have shape (batch self.size /n/)
 
         Note: batch self.size /n/ is defined at runtime.
         is None
@@ -56,5 +54,8 @@ class SACCritic(nn.Module, BaseCritic):
         )
 
     def forward(self, obs: torch.Tensor, action: torch.Tensor):
-        # TODO: return the two q values
+        # Return the two q values
+        obs_action = torch.cat([obs, action], dim=-1)
+        values = [self.Q1.forward(obs_action), self.Q2.forward(obs_action)]
+
         return values
