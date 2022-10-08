@@ -65,6 +65,7 @@ class SACAgent(BaseAgent):
                 target_qs -
                 self.actor.alpha.detach() * entropy
             )
+        target = target.detach()
 
         # 2. Get current Q estimates and calculate critic loss
         qs = self.critic.forward(ob_no, ac_na)

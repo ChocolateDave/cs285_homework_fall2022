@@ -104,7 +104,7 @@ class MLPPolicySAC(MLPPolicy):
 
         policy: Distribution = self.forward(obs)
         action: torch.Tensor = policy.rsample()
-        entropy: torch.Tensor = policy.log_prob(action).mean(-1, keepdim=True)
+        entropy: torch.Tensor = policy.log_prob(action).sum(-1, keepdim=True)
         actor_q = torch.minimum(*critic.forward(obs, action))
 
         # Policy loss
