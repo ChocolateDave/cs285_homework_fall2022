@@ -12,9 +12,9 @@ class BootstrappedContinuousCritic(nn.Module, BaseCritic):
         Prefixes and suffixes:
         ob - observation
         ac - action
-        _no - this tensor should have shape (batch self.size /n/, observation dim)
-        _na - this tensor should have shape (batch self.size /n/, action dim)
-        _n  - this tensor should have shape (batch self.size /n/)
+        _no - this tensor have shape (batch self.size /n/, observation dim)
+        _na - this tensor have shape (batch self.size /n/, action dim)
+        _n  - this tensor have shape (batch self.size /n/)
 
         Note: batch self.size /n/ is defined at runtime.
         is None
@@ -30,7 +30,9 @@ class BootstrappedContinuousCritic(nn.Module, BaseCritic):
 
         # critic parameters
         self.num_target_updates = hparams['num_target_updates']
-        self.num_grad_steps_per_target_update = hparams['num_grad_steps_per_target_update']
+        self.num_grad_steps_per_target_update = hparams[
+            'num_grad_steps_per_target_update'
+        ]
         self.gamma = hparams['gamma']
         self.critic_network = ptu.build_mlp(
             self.ob_dim,
@@ -57,22 +59,26 @@ class BootstrappedContinuousCritic(nn.Module, BaseCritic):
         """
             Update the parameters of the critic.
 
-            let sum_of_path_lengths be the sum of the lengths of the paths sampled from
-                Agent.sample_trajectories
-            let num_paths be the number of paths sampled from Agent.sample_trajectories
+            let sum_of_path_lengths be the sum of the lengths of the paths
+            sampled from `Agent.sample_trajectories`
+            let num_paths be the number of paths sampled from
+            `Agent.sample_trajectories`
 
             arguments:
                 ob_no: shape: (sum_of_path_lengths, ob_dim)
-                next_ob_no: shape: (sum_of_path_lengths, ob_dim). The observation after taking one step forward
-                reward_n: length: sum_of_path_lengths. Each element in reward_n is a scalar containing
-                    the reward for each timestep
-                terminal_n: length: sum_of_path_lengths. Each element in terminal_n is either 1 if the episode ended
-                    at that timestep of 0 if the episode did not end
+                next_ob_no: shape: (sum_of_path_lengths, ob_dim).
+                The observation after taking one step forward
+                reward_n: length: sum_of_path_lengths.
+                Each element in reward_n is a scalar containing
+                the reward for each timestep
+                terminal_n: length: sum_of_path_lengths.
+                Each element in terminal_n is either 1 if the episode ended
+                at that timestep of 0 if the episode did not end
 
             returns:
                 training loss
         """
-        # TODO: Implement the pseudocode below: do the following (
+        # Implement the pseudocode below: do the following (
         # self.num_grad_steps_per_target_update * self.num_target_updates)
         # times:
         # every self.num_grad_steps_per_target_update steps (which includes the
@@ -85,5 +91,19 @@ class BootstrappedContinuousCritic(nn.Module, BaseCritic):
         #       to 0) when a terminal state is reached
         # HINT: make sure to squeeze the output of the critic_network to ensure
         #       that its dimensions match the reward
+        for step in range(
+            self.num_grad_steps_per_target_update * self.num_target_updates
+        ):
+            self.optimizer.zero_grad()
+
+            if step % self.num_grad_steps_per_target_update == 0:
+                v_next_s = self.forward_np(next_ob_no)
+                v_target = reward_n + self.gamma * v_next_s * (1 - terminal_n)
+                v_target = ptu.from_numpy(v_target)
+
+            v_s = self.forward(ptu.from_numpy(ob_no))
+            loss = self.loss(v_s, v_target)
+            loss.backward()
+            self.optimizer.step()
 
         return loss.item()
