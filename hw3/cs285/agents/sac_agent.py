@@ -72,8 +72,8 @@ class SACAgent(BaseAgent):
         # 2. Get current Q estimates and calculate critic loss
         q_1, q_2 = self.critic.forward(ob_no, ac_na)
         critic_loss = (
-            self.critic.loss(q_1, target_q) +
-            self.critic.loss(q_2, target_q)
+            0.5 * self.critic.loss(q_1, target_q) +
+            0.5 * self.critic.loss(q_2, target_q)
         )
 
         # 3. Optimize the critic

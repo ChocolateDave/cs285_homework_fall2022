@@ -15,7 +15,7 @@ class DQNCritic(BaseCritic):
         self.ob_dim = hparams['ob_dim']
 
         if isinstance(self.ob_dim, int):
-            self.input_shape = (self.ob_dim,)
+            self.input_shape = (self.ob_dim, )
         else:
             self.input_shape = hparams['input_shape']
 

@@ -82,11 +82,7 @@ class MLPPolicySAC(MLPPolicy):
         # You will need to clip log values
         # You will need SquashedNormal from sac_utils file
         loc: torch.Tensor = self.mean_net(observation)
-        log_std_min, log_std_max = self.log_std_bounds
-        scale = torch.exp(
-            log_std_min + 0.5 * (log_std_max - log_std_min)
-            * (self.logstd + 1)
-        )
+        scale = self.logstd.clip(*self.log_std_bounds).exp()
         action_distribution = sac_utils.SquashedNormal(
             loc=loc,
             scale=scale
@@ -98,14 +94,14 @@ class MLPPolicySAC(MLPPolicy):
         # Update actor network and entropy regularizer
         # return losses and alpha value
         policy: Distribution = self.forward(obs)
-        action: torch.Tensor = policy.rsample()
+        action: torch.Tensor = policy.rsample().clip(*self.action_range)
         entropy: torch.Tensor = policy.log_prob(action).sum(-1, keepdim=True)
         q_1, q_2 = critic.forward(obs, action)
-        min_actor_q = torch.min(q_1, q_2)
+        mean_actor_q = torch.mean(q_1, q_2)
 
         # Policy loss
         self.optimizer.zero_grad()
-        actor_loss = (self.alpha.detach() * entropy - min_actor_q).mean()
+        actor_loss = (self.alpha.detach() * entropy - mean_actor_q).mean()
         actor_loss.backward()
         self.optimizer.step()
 
