@@ -84,7 +84,7 @@ class SACAgent(BaseAgent):
         # 1. Implement the following pseudocode:
         # for agent_params['num_critic_updates_per_agent_update'] steps,
         #     update the critic
-        for step in range(
+        for _ in range(
             self.agent_params['num_critic_updates_per_agent_update']
         ):
             critic_loss = self.update_critic(
@@ -97,24 +97,27 @@ class SACAgent(BaseAgent):
 
         # 2. Softly update the target every critic_target_update_frequency
         # (HINT: look at sac_utils)
-            if step % self.critic_target_update_frequency == 0:
-                soft_update_params(
-                    net=self.critic,
-                    target_net=self.critic_target,
-                    tau=self.critic_tau
-                )
+        if self.training_step % self.critic_target_update_frequency == 0:
+            soft_update_params(
+                net=self.critic,
+                target_net=self.critic_target,
+                tau=self.critic_tau
+            )
 
         # 3. Implement following pseudocode:
         # If you need to update actor
         # for agent_params['num_actor_updates_per_agent_update'] steps,
         #     update the actor
-        for _ in range(
-            self.agent_params['num_actor_updates_per_agent_update']
-        ):
-            actor_loss, alpha_loss, temperature = self.actor.update(
-                obs=ptu.from_numpy(ob_no),
-                critic=self.critic
-            )
+        if self.training_step % self.actor_update_frequency == 0:
+            for _ in range(
+                self.agent_params['num_actor_updates_per_agent_update']
+            ):
+                actor_loss, alpha_loss, temperature = self.actor.update(
+                    obs=ptu.from_numpy(ob_no),
+                    critic=self.critic
+                )
+
+        self.training_step += 1
 
         # 4. gather losses for logging
         loss = OrderedDict()
