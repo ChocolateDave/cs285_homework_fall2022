@@ -55,9 +55,7 @@ class SACAgent(BaseAgent):
         # 1. Compute the target Q value.
         # HINT: You need to use the entropy term (alpha)
         policy = self.actor.forward(next_ob_no)
-        next_ac_na = ptu.from_numpy(
-            self.actor.get_action(ptu.to_numpy(next_ob_no))
-        )
+        next_ac_na = policy.rsample().clamp(*self.action_range)
         q_1_prime, q_2_prime = self.critic_target.forward(
             obs=next_ob_no,
             action=next_ac_na
