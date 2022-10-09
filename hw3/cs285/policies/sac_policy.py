@@ -108,7 +108,7 @@ class MLPPolicySAC(MLPPolicy):
 
         # Alpha loss
         alpha_loss = (
-            self.alpha * (-log_prob - self.target_entropy).detach()
+            self.alpha.detach() * (-log_prob - self.target_entropy).detach()
         ).mean()
         self.log_alpha_optimizer.zero_grad()
         alpha_loss.backward()

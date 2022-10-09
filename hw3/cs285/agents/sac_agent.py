@@ -83,9 +83,6 @@ class SACAgent(BaseAgent):
         return critic_loss
 
     def train(self, ob_no, ac_na, re_n, next_ob_no, terminal_n):
-        # 1. Implement the following pseudocode:
-        # for agent_params['num_critic_updates_per_agent_update'] steps,
-        #     update the critic
         for _ in range(
             self.agent_params['num_critic_updates_per_agent_update']
         ):
