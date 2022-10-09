@@ -53,25 +53,25 @@ class SACAgent(BaseAgent):
     def update_critic(self, ob_no, ac_na, next_ob_no, re_n, terminal_n):
         # 1. Compute the target Q value.
         # HINT: You need to use the entropy term (alpha)
-        policy = self.actor.forward(next_ob_no)
-        next_ac_na = policy.rsample()
-        q_1_prime, q_2_prime = self.critic_target.forward(
-            obs=next_ob_no,
-            action=next_ac_na
-        )
-        entropy = policy.log_prob(next_ac_na).sum(-1, keepdim=True)
-        target_q: torch.Tensor = \
-            re_n + self.gamma * (1 - terminal_n) * (
-                torch.min(q_1_prime, q_2_prime) -
-                self.actor.alpha.detach() * entropy
+        with torch.no_grad():
+            policy = self.actor.forward(next_ob_no)
+            next_ac_na = policy.rsample()
+            q_1_prime, q_2_prime = self.critic_target.forward(
+                obs=next_ob_no,
+                action=next_ac_na
             )
-        target_q = target_q.detach()
+            entropy = policy.log_prob(next_ac_na).sum(-1, keepdim=True)
+            target_q: torch.Tensor = \
+                re_n + self.gamma * (1 - terminal_n) * (
+                    torch.min(q_1_prime, q_2_prime) -
+                    self.actor.alpha * entropy
+                )
 
         # 2. Get current Q estimates and calculate critic loss
         q_1, q_2 = self.critic.forward(ob_no, ac_na)
         critic_loss = (
-            0.5 * self.critic.loss(q_1, target_q) +
-            0.5 * self.critic.loss(q_2, target_q)
+            self.critic.loss(q_1, target_q) +
+            self.critic.loss(q_2, target_q)
         )
 
         # 3. Optimize the critic
@@ -96,19 +96,6 @@ class SACAgent(BaseAgent):
                 terminal_n=ptu.from_numpy(terminal_n)
             )
 
-        # 2. Softly update the target every critic_target_update_frequency
-        # (HINT: look at sac_utils)
-        if self.training_step % self.critic_target_update_frequency == 0:
-            soft_update_params(
-                net=self.critic,
-                target_net=self.critic_target,
-                tau=self.critic_tau
-            )
-
-        # 3. Implement following pseudocode:
-        # If you need to update actor
-        # for agent_params['num_actor_updates_per_agent_update'] steps,
-        #     update the actor
         if self.training_step % self.actor_update_frequency == 0:
             for _ in range(
                 self.agent_params['num_actor_updates_per_agent_update']
@@ -116,6 +103,14 @@ class SACAgent(BaseAgent):
                 actor_loss, alpha_loss, temperature = self.actor.update(
                     obs=ptu.from_numpy(ob_no),
                     critic=self.critic
+                )
+
+        if self.training_step % self.critic_target_update_frequency == 0:
+            with torch.no_grad():
+                soft_update_params(
+                    net=self.critic,
+                    target_net=self.critic_target,
+                    tau=self.critic_tau
                 )
 
         self.training_step += 1

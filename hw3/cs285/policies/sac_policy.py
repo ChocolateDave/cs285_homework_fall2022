@@ -62,9 +62,12 @@ class MLPPolicySAC(MLPPolicy):
         with torch.no_grad():
             dist = self.forward(ptu.from_numpy(obs))
             if sample:
-                action: torch.Tensor = dist.sample()
+                action: torch.Tensor = dist.rsample()
             else:
                 action: torch.Tensor = dist.mean
+        action = \
+            self.action_range[0] + (
+                self.action_range[1] - self.action_range[0]) * action
         action = ptu.to_numpy(action)
 
         return action
@@ -96,7 +99,7 @@ class MLPPolicySAC(MLPPolicy):
         action: torch.Tensor = policy.rsample()
         entropy: torch.Tensor = policy.log_prob(action).sum(-1, keepdim=True)
         q_1, q_2 = critic.forward(obs, action)
-        min_actor_q = torch.min(q_1, q_2)
+        min_actor_q = torch.min(q_1, q_2).detach()
 
         # Policy loss
         self.optimizer.zero_grad()
