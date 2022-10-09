@@ -55,14 +55,18 @@ class SACAgent(BaseAgent):
         # 1. Compute the target Q value.
         # HINT: You need to use the entropy term (alpha)
         policy = self.actor.forward(next_ob_no)
-        next_ac_na = policy.sample()
-        target_qs = torch.minimum(
-            *self.critic_target.forward(next_ob_no, next_ac_na)
+        next_ac_na = ptu.from_numpy(
+            self.actor.get_action(ptu.to_numpy(next_ob_no))
         )
-        entropy = policy.log_prob(next_ac_na).sum(-1, keepdim=True)
+        q_1_prime, q_2_prime = self.critic_target.forward(
+            obs=next_ob_no,
+            action=next_ac_na
+        )
+        min_target_qs = torch.min(q_1_prime, q_2_prime)
+        entropy = policy.log_prob(next_ac_na).sum(1, keepdim=True)
         target: torch.Tensor = \
             re_n + self.gamma * (1 - terminal_n) * (
-                target_qs -
+                min_target_qs -
                 self.actor.alpha * entropy
             )
         target = target.detach()
@@ -88,9 +92,9 @@ class SACAgent(BaseAgent):
             critic_loss = self.update_critic(
                 ob_no=ptu.from_numpy(ob_no),
                 ac_na=ptu.from_numpy(ac_na),
-                re_n=ptu.from_numpy(re_n).unsqueeze(-1),
+                re_n=ptu.from_numpy(re_n),
                 next_ob_no=ptu.from_numpy(next_ob_no),
-                terminal_n=ptu.from_numpy(terminal_n).unsqueeze(-1)
+                terminal_n=ptu.from_numpy(terminal_n)
             )
 
         # 2. Softly update the target every critic_target_update_frequency

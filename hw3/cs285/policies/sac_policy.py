@@ -50,7 +50,7 @@ class MLPPolicySAC(MLPPolicy):
 
     @property
     def alpha(self):
-        # TODO: Formulate entropy term
+        # Formulate entropy term
         return self.log_alpha.exp()
 
     def get_action(self, obs: np.ndarray, sample=True) -> np.ndarray:
@@ -103,18 +103,21 @@ class MLPPolicySAC(MLPPolicy):
         self.log_alpha_optimizer.zero_grad()
 
         policy: Distribution = self.forward(obs)
-        action: torch.Tensor = policy.rsample().clamp(*self.action_range)
-        entropy: torch.Tensor = policy.log_prob(action).sum(-1, keepdim=True)
-        actor_q = torch.minimum(*critic.forward(obs, action))
+        action: torch.Tensor = ptu.from_numpy(
+            self.get_action(ptu.to_numpy(obs))
+        )
+        entropy: torch.Tensor = policy.log_prob(action).sum(1, keepdim=True)
+        q_1, q_2 = critic.forward(obs, action)
+        min_actor_q = torch.min(q_1, q_2)
 
         # Policy loss
-        actor_loss = (self.alpha * entropy - actor_q).mean()
+        actor_loss = (self.alpha * entropy - min_actor_q).mean()
         actor_loss.backward()
         self.optimizer.step()
 
         # Alpha loss
         alpha_loss = (
-            self.alpha - (-entropy - self.target_entropy).detach()
+            self.log_alpha * (-entropy - self.target_entropy).detach()
         ).mean()
         alpha_loss.backward()
         self.log_alpha_optimizer.step()
