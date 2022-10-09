@@ -97,11 +97,11 @@ class MLPPolicySAC(MLPPolicy):
         action: torch.Tensor = policy.rsample().clip(*self.action_range)
         entropy: torch.Tensor = policy.log_prob(action).sum(-1, keepdim=True)
         q_1, q_2 = critic.forward(obs, action)
-        mean_actor_q = torch.mean(q_1, q_2)
+        min_actor_q = torch.min(q_1, q_2)
 
         # Policy loss
         self.optimizer.zero_grad()
-        actor_loss = (self.alpha.detach() * entropy - mean_actor_q).mean()
+        actor_loss = (self.alpha.detach() * entropy - min_actor_q).mean()
         actor_loss.backward()
         self.optimizer.step()
 
