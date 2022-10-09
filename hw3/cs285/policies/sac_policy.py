@@ -62,13 +62,10 @@ class MLPPolicySAC(MLPPolicy):
         with torch.no_grad():
             dist = self.forward(ptu.from_numpy(obs))
             if sample:
-                action: torch.Tensor = dist.rsample()
+                action: torch.Tensor = dist.sample()
             else:
                 action: torch.Tensor = dist.mean
-        action = \
-            self.action_range[0] + (
-                self.action_range[1] - self.action_range[0]) * action
-        action = ptu.to_numpy(action)
+        action = ptu.to_numpy(action.clamp(*self.action_range))
 
         return action
 
@@ -97,21 +94,23 @@ class MLPPolicySAC(MLPPolicy):
         # return losses and alpha value
         policy: Distribution = self.forward(obs)
         action: torch.Tensor = policy.rsample()
-        entropy: torch.Tensor = policy.log_prob(action).sum(-1, keepdim=True)
-        q_1, q_2 = critic.forward(obs, action)
-        min_actor_q = torch.min(q_1, q_2).detach()
+        log_prob: torch.Tensor = policy.log_prob(action).sum(-1, keepdim=True)
+
+        with torch.no_grad():
+            q_1, q_2 = critic.forward(obs, action)
+            actor_q = torch.min(q_1, q_2).detach()
 
         # Policy loss
+        actor_loss = (self.alpha.detach() * log_prob - actor_q).mean()
         self.optimizer.zero_grad()
-        actor_loss = (self.alpha.detach() * entropy - min_actor_q).mean()
         actor_loss.backward()
         self.optimizer.step()
 
         # Alpha loss
-        self.log_alpha_optimizer.zero_grad()
         alpha_loss = (
-            self.log_alpha * (-entropy - self.target_entropy).detach()
+            self.alpha * (-log_prob - self.target_entropy).detach()
         ).mean()
+        self.log_alpha_optimizer.zero_grad()
         alpha_loss.backward()
         self.log_alpha_optimizer.step()
 
