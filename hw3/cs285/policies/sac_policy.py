@@ -99,9 +99,6 @@ class MLPPolicySAC(MLPPolicy):
     def update(self, obs, critic):
         # Update actor network and entropy regularizer
         # return losses and alpha value
-        self.optimizer.zero_grad()
-        self.log_alpha_optimizer.zero_grad()
-
         policy: Distribution = self.forward(obs)
         action: torch.Tensor = policy.rsample()
         entropy: torch.Tensor = policy.log_prob(action).sum(-1, keepdim=True)
@@ -109,11 +106,13 @@ class MLPPolicySAC(MLPPolicy):
         min_actor_q = torch.min(q_1, q_2)
 
         # Policy loss
+        self.optimizer.zero_grad()
         actor_loss = (self.alpha.detach() * entropy - min_actor_q).mean()
         actor_loss.backward()
         self.optimizer.step()
 
         # Alpha loss
+        self.log_alpha_optimizer.zero_grad()
         alpha_loss = (
             self.alpha * (-entropy - self.target_entropy).detach()
         ).mean()

@@ -70,8 +70,8 @@ class SACAgent(BaseAgent):
         target = target.detach()
 
         # 2. Get current Q estimates and calculate critic loss
-        qs = self.critic.forward(ob_no, ac_na)
-        critic_loss = F.mse_loss(qs[0], target) + F.mse_loss(qs[1], target)
+        q_1, q_2 = self.critic.forward(ob_no, ac_na)
+        critic_loss = F.mse_loss(q_1, target) + F.mse_loss(q_2, target)
 
         # 3. Optimize the critic
         self.critic.optimizer.zero_grad()
