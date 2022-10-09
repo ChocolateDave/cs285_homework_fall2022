@@ -65,6 +65,7 @@ class MLPPolicySAC(MLPPolicy):
                 action: torch.Tensor = dist.sample()
             else:
                 action: torch.Tensor = dist.mean
+        action = ptu.to_numpy(action)
 
         return action
 
