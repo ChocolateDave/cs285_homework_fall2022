@@ -95,10 +95,8 @@ class MLPPolicySAC(MLPPolicy):
         policy: Distribution = self.forward(obs)
         action: torch.Tensor = policy.rsample()
         log_prob: torch.Tensor = policy.log_prob(action).sum(1, keepdim=True)
-
-        with torch.no_grad():
-            q_1, q_2 = critic.forward(obs, action)
-            actor_q = torch.min(q_1, q_2).detach()
+        q_1, q_2 = critic.forward(obs, action)
+        actor_q = torch.mean(torch.stack([q_1, q_2]), 0)
 
         # Policy loss
         actor_loss = (self.alpha.detach() * log_prob - actor_q).mean()

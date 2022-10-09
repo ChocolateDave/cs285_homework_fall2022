@@ -56,12 +56,12 @@ class SACAgent(BaseAgent):
         policy = self.actor.forward(next_ob_no)
         next_ac_na = policy.rsample()
         log_prob = policy.log_prob(next_ac_na).sum(1, keepdim=True)
-        q_1_prime, q_2_prime = self.critic_target.forward(
+        next_q_1, next_q_2 = self.critic_target.forward(
             obs=next_ob_no,
             action=next_ac_na
         )
         target_v: torch.Tensor = (
-                torch.min(q_1_prime, q_2_prime) -
+                torch.min(next_q_1, next_q_2) -
                 self.actor.alpha.detach() * log_prob
             ).squeeze(-1)
         target_q = re_n + self.gamma * (1 - terminal_n) * target_v
@@ -69,9 +69,9 @@ class SACAgent(BaseAgent):
 
         # 2. Get current Q estimates and calculate critic loss
         q_1, q_2 = self.critic.forward(ob_no, ac_na)
-        critic_loss = (
-            self.critic.loss.forward(q_1, target_q) +
-            self.critic.loss.forward(q_2, target_q)
+        critic_loss = 0.5 * (
+            0.5 * self.critic.loss.forward(q_1, target_q) + 
+            0.5 * self.critic.loss.forward(q_2, target_q)
         )
 
         # 3. Optimize the critic
