@@ -65,7 +65,7 @@ class SACAgent(BaseAgent):
         target: torch.Tensor = \
             re_n + self.gamma * (1 - terminal_n) * (
                 min_target_qs -
-                self.actor.alpha * entropy
+                self.actor.alpha.detach() * entropy
             )
         target = target.detach()
 

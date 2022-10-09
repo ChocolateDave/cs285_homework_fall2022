@@ -109,13 +109,13 @@ class MLPPolicySAC(MLPPolicy):
         min_actor_q = torch.min(q_1, q_2)
 
         # Policy loss
-        actor_loss = (self.alpha * entropy - min_actor_q).mean()
+        actor_loss = (self.alpha.detach() * entropy - min_actor_q).mean()
         actor_loss.backward()
         self.optimizer.step()
 
         # Alpha loss
         alpha_loss = (
-            self.log_alpha * (-entropy - self.target_entropy).detach()
+            self.alpha * (-entropy - self.target_entropy).detach()
         ).mean()
         alpha_loss.backward()
         self.log_alpha_optimizer.step()
