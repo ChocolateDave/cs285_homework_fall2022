@@ -103,8 +103,8 @@ class MLPPolicySAC(MLPPolicy):
         self.log_alpha_optimizer.zero_grad()
 
         policy: Distribution = self.forward(obs)
-        action: torch.Tensor = policy.rsample().clamp(*self.action_range)
-        entropy: torch.Tensor = policy.log_prob(action).sum(1, keepdim=True)
+        action: torch.Tensor = policy.rsample()
+        entropy: torch.Tensor = policy.log_prob(action).sum(-1, keepdim=True)
         q_1, q_2 = critic.forward(obs, action)
         min_actor_q = torch.min(q_1, q_2)
 

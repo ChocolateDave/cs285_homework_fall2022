@@ -55,13 +55,13 @@ class SACAgent(BaseAgent):
         # 1. Compute the target Q value.
         # HINT: You need to use the entropy term (alpha)
         policy = self.actor.forward(next_ob_no)
-        next_ac_na = policy.rsample().clamp(*self.action_range)
+        next_ac_na = policy.rsample()
         q_1_prime, q_2_prime = self.critic_target.forward(
             obs=next_ob_no,
             action=next_ac_na
         )
         min_target_qs = torch.min(q_1_prime, q_2_prime)
-        entropy = policy.log_prob(next_ac_na).sum(1, keepdim=True)
+        entropy = policy.log_prob(next_ac_na).sum(-1, keepdim=True)
         target: torch.Tensor = \
             re_n + self.gamma * (1 - terminal_n) * (
                 min_target_qs -
