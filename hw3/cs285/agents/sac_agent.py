@@ -53,20 +53,19 @@ class SACAgent(BaseAgent):
     def update_critic(self, ob_no, ac_na, next_ob_no, re_n, terminal_n):
         # 1. Compute the target Q value.
         # HINT: You need to use the entropy term (alpha)
-        with torch.no_grad():
-            policy = self.actor.forward(next_ob_no)
-            next_ac_na = policy.rsample()
-            log_prob = policy.log_prob(next_ac_na).sum(1, keepdim=True)
-            q_1_prime, q_2_prime = self.critic_target.forward(
-                obs=next_ob_no,
-                action=next_ac_na
-            )
-            target_v: torch.Tensor = (
-                    torch.min(q_1_prime, q_2_prime) -
-                    self.actor.alpha.detach() * log_prob
-                )
-            target_q = re_n + self.gamma * (1 - terminal_n) * target_v
-            target_q = target_q.detach()
+        policy = self.actor.forward(next_ob_no)
+        next_ac_na = policy.rsample()
+        log_prob = policy.log_prob(next_ac_na).sum(1, keepdim=True)
+        q_1_prime, q_2_prime = self.critic_target.forward(
+            obs=next_ob_no,
+            action=next_ac_na
+        )
+        target_v: torch.Tensor = (
+                torch.min(q_1_prime, q_2_prime) -
+                self.actor.alpha.detach() * log_prob
+            ).squeeze(-1)
+        target_q = re_n + self.gamma * (1 - terminal_n) * target_v
+        target_q = target_q.unsqueeze(1).detach()
 
         # 2. Get current Q estimates and calculate critic loss
         q_1, q_2 = self.critic.forward(ob_no, ac_na)
@@ -83,6 +82,8 @@ class SACAgent(BaseAgent):
         return critic_loss
 
     def train(self, ob_no, ac_na, re_n, next_ob_no, terminal_n):
+        self.training_step += 1
+
         for _ in range(
             self.agent_params['num_critic_updates_per_agent_update']
         ):
@@ -110,8 +111,6 @@ class SACAgent(BaseAgent):
                     target_net=self.critic_target,
                     tau=self.critic_tau
                 )
-
-        self.training_step += 1
 
         # 4. gather losses for logging
         loss = OrderedDict()
