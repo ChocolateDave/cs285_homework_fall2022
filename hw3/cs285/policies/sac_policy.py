@@ -99,7 +99,7 @@ class MLPPolicySAC(MLPPolicy):
         # return losses and alpha value
         policy: Distribution = self.forward(obs)
         action: torch.Tensor = policy.rsample()
-        entropy: torch.Tensor = policy.log_prob(action).mean(-1, keepdim=True)
+        entropy: torch.Tensor = policy.log_prob(action).sum(-1, keepdim=True)
         q_1, q_2 = critic.forward(obs, action)
         min_actor_q = torch.min(q_1, q_2)
 
@@ -112,7 +112,7 @@ class MLPPolicySAC(MLPPolicy):
         # Alpha loss
         self.log_alpha_optimizer.zero_grad()
         alpha_loss = (
-            self.alpha * (-entropy - self.target_entropy).detach()
+            self.log_alpha * (-entropy - self.target_entropy).detach()
         ).mean()
         alpha_loss.backward()
         self.log_alpha_optimizer.step()

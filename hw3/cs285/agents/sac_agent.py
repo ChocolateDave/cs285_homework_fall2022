@@ -61,7 +61,7 @@ class SACAgent(BaseAgent):
             obs=next_ob_no,
             action=next_ac_na
         )
-        entropy = policy.log_prob(next_ac_na).mean(-1, keepdim=True)
+        entropy = policy.log_prob(next_ac_na).sum(-1, keepdim=True)
         target_q: torch.Tensor = \
             re_n + self.gamma * (1 - terminal_n) * (
                 torch.min(q_1_prime, q_2_prime) -
