@@ -8,7 +8,6 @@ from cs285.infrastructure.replay_buffer import ReplayBuffer
 from cs285.infrastructure.sac_utils import soft_update_params
 from cs285.infrastructure.utils import copy
 from cs285.policies.sac_policy import MLPPolicySAC
-from torch.nn import functional as F
 
 from .base_agent import BaseAgent
 
@@ -60,18 +59,20 @@ class SACAgent(BaseAgent):
             obs=next_ob_no,
             action=next_ac_na
         )
-        min_target_qs = torch.min(q_1_prime, q_2_prime)
-        entropy = policy.log_prob(next_ac_na).sum(-1, keepdim=True)
-        target: torch.Tensor = \
+        entropy = policy.log_prob(next_ac_na).mean(-1, keepdim=True)
+        target_q: torch.Tensor = \
             re_n + self.gamma * (1 - terminal_n) * (
-                min_target_qs -
+                torch.min(q_1_prime, q_2_prime) -
                 self.actor.alpha.detach() * entropy
             )
-        target = target.detach()
+        target_q = target_q.detach()
 
         # 2. Get current Q estimates and calculate critic loss
         q_1, q_2 = self.critic.forward(ob_no, ac_na)
-        critic_loss = F.mse_loss(q_1, target) + F.mse_loss(q_2, target)
+        critic_loss = (
+            self.critic.loss(q_1, target_q) +
+            self.critic.loss(q_2, target_q)
+        )
 
         # 3. Optimize the critic
         self.critic.optimizer.zero_grad()
