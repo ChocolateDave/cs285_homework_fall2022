@@ -92,11 +92,11 @@ class MLPPolicySAC(MLPPolicy):
     def update(self, obs, critic):
         # Update actor network and entropy regularizer
         # return losses and alpha value
+        policy: Distribution = self.forward(obs)
+        action: torch.Tensor = policy.rsample()
+        log_prob: torch.Tensor = policy.log_prob(action)
+        log_prob = log_prob.sum(1, keepdim=True)
         with torch.no_grad():
-            policy: Distribution = self.forward(obs)
-            action: torch.Tensor = policy.rsample()
-            log_prob: torch.Tensor = policy.log_prob(action)
-            log_prob = log_prob.sum(1, keepdim=True)
             q_1, q_2 = critic.forward(obs, action)
             actor_q = torch.min(q_1, q_2).detach()
 
