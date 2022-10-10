@@ -53,22 +53,21 @@ class SACAgent(BaseAgent):
     def update_critic(self, ob_no, ac_na, next_ob_no, re_n, terminal_n):
         # 1. Compute the target Q value.
         # HINT: You need to use the entropy term (alpha)
-        with torch.no_grad():
-            policy = self.actor.forward(next_ob_no)
-            next_ac_na = ptu.from_numpy(
-                self.actor.get_action(ptu.to_numpy(next_ob_no))
-            )
-            log_prob = policy.log_prob(next_ac_na).sum(1, keepdim=True)
-            next_q_1, next_q_2 = self.critic_target.forward(
-                obs=next_ob_no,
-                action=next_ac_na
-            )
-            alpha = self.actor.alpha.item()
-            target_v: torch.Tensor = (
-                torch.min(next_q_1, next_q_2) - alpha * log_prob
-            ).squeeze(-1)
-            target_q = re_n + self.gamma * (1 - terminal_n) * target_v
-            target_q = target_q.unsqueeze(1).detach()
+        policy = self.actor.forward(next_ob_no)
+        next_ac_na = ptu.from_numpy(
+            self.actor.get_action(ptu.to_numpy(next_ob_no))
+        )
+        log_prob = policy.log_prob(next_ac_na).sum(1, keepdim=True)
+        next_q_1, next_q_2 = self.critic_target.forward(
+            obs=next_ob_no,
+            action=next_ac_na
+        )
+        alpha = self.actor.alpha.item()
+        target_v: torch.Tensor = (
+            torch.min(next_q_1, next_q_2) - alpha * log_prob
+        ).squeeze(-1)
+        target_q = re_n + self.gamma * (1 - terminal_n) * target_v
+        target_q = target_q.unsqueeze(1).detach()
 
         # 2. Get current Q estimates and calculate critic loss
         q_1, q_2 = self.critic.forward(ob_no, ac_na)
