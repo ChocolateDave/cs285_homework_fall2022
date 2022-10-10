@@ -3,7 +3,6 @@ from collections import OrderedDict
 import cs285.infrastructure.pytorch_util as ptu
 import gym
 import torch
-from torch.nn import functional as F
 
 from cs285.agents.base_agent import BaseAgent
 from cs285.critics.sac_critic import SACCritic
@@ -56,7 +55,9 @@ class SACAgent(BaseAgent):
         # HINT: You need to use the entropy term (alpha)
         with torch.no_grad():
             policy = self.actor.forward(next_ob_no)
-            next_ac_na = policy.rsample()
+            next_ac_na = ptu.from_numpy(
+                self.actor.get_action(ptu.to_numpy(next_ob_no))
+            )
             log_prob = policy.log_prob(next_ac_na).sum(1, keepdim=True)
             next_q_1, next_q_2 = self.critic_target.forward(
                 obs=next_ob_no,
