@@ -97,7 +97,7 @@ class MLPPolicySAC(MLPPolicy):
         log_prob: torch.Tensor = policy.log_prob(action)
         log_prob = log_prob.sum(1, keepdim=True)
         q_1, q_2 = critic.forward(obs, action)
-        actor_q = torch.min(q_1, q_2).detach()
+        actor_q = torch.min(q_1, q_2)
 
         # Policy loss
         actor_loss = (self.alpha.detach() * log_prob - actor_q).mean()
