@@ -3,13 +3,14 @@ from collections import OrderedDict
 import cs285.infrastructure.pytorch_util as ptu
 import gym
 import torch
+from torch.nn import functional as F
+
+from cs285.agents.base_agent import BaseAgent
 from cs285.critics.sac_critic import SACCritic
 from cs285.infrastructure.replay_buffer import ReplayBuffer
 from cs285.infrastructure.sac_utils import soft_update_params
 from cs285.infrastructure.utils import copy
 from cs285.policies.sac_policy import MLPPolicySAC
-
-from .base_agent import BaseAgent
 
 
 class SACAgent(BaseAgent):
@@ -61,10 +62,10 @@ class SACAgent(BaseAgent):
                 obs=next_ob_no,
                 action=next_ac_na
             )
+            alpha = self.actor.alpha.item()
             target_v: torch.Tensor = (
-                    torch.min(next_q_1, next_q_2) -
-                    self.actor.alpha.detach() * log_prob
-                ).squeeze(-1)
+                torch.min(next_q_1, next_q_2) - alpha * log_prob
+            ).squeeze(-1)
             target_q = re_n + self.gamma * (1 - terminal_n) * target_v
             target_q = target_q.unsqueeze(1).detach()
 
