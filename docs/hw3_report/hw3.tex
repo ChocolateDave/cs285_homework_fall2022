@@ -176,14 +176,17 @@ For this question I explore the influence of different \texttt{hidden\_size} set
 \begin{figure}[thbp]
     \centering 
     \includegraphics[width=\textwidth]{img/q6.png}
-    \caption{Average Evaluation Returns running Soft Actor-Critic on \texttt{HalfCheetah-v4} (left) and \texttt{InvertedPendulum-v4} (right). Average rewards on \texttt{HalfCheetah-v4} reaches around $200$ after 50,000 steps, and rewards on \texttt{InvertedPendulum-v4} reaches $1,000$ after 20,000 steps. However, rewards on the second environment oscillate drastically indicating a potential high variance estimation of the state-value function.}
+    \caption{Average Evaluation Returns running Soft Actor-Critic on \texttt{InvertedPendulum-v4} (left) and \texttt{HalfCheetah-v4} (right). Average rewards on \texttt{HalfCheetah-v4} reaches around $300$ after 50,000 steps, and rewards on \texttt{InvertedPendulum-v4} reaches $1,000$ after 20,000 steps. However, results varies greatly with different seed settings. I only submit the best result for my submission.}
     \label{fig:6}
 \end{figure}
 \subsubsection*{Codes}
 \begin{lstlisting}
     echo "Running Homework 3 Question 6";
-    python cs285/scripts/run_hw3_sac.py --env_name InvertedPendulum-v4 --ep_len 1000 --discount 0.99 --scalar_log_freq 1000 -n 100000 -l 2 -s 256 -b 1000 -eb 2000 -lr 0.0003 --init_temperature 0.1 ----exp_name q6a_sac_InvertedPendulum_<parameters> --seed 1 -gpu_id $1;
-    python cs285/scripts/run_hw3_sac.py --env_name HalfCheetah-v4 --ep_len 150 --discount 0.99 --scalar_log_freq 1500 -n 2000000 -l 2 -s 256 -b 1500 -eb 1500 -lr 0.0003 --init_temperature 0.1 --exp_name q6b_sac_HalfCheetah_<parameters> --seed 1 -gpu_id $1
+    for SEED in 1 2 3
+    do
+        python cs285/scripts/run_hw3_sac.py --env_name InvertedPendulum-v4 --ep_len 1000 --discount 0.99 --scalar_log_freq 1000 -n 100000 -l 2 -s 256 -b 1000 -eb 2000 -lr 0.0003 --init_temperature 0.1 --exp_name q6a_sac_InvertedPendulum_seed_${SEED} --seed $SEED -gpu_id $1;
+        python cs285/scripts/run_hw3_sac.py --env_name HalfCheetah-v4 --ep_len 150 --discount 0.99 --scalar_log_freq 1500 -n 2000000 -l 2 -s 256 -b 1500 -eb 1500 -lr 0.0003 --init_temperature 0.1 --exp_name q6b_sac_HalfCheetah_seed_${SEED} --seed $SEED -gpu_id $1
+    done
     echo "Done!"
 \end{lstlisting}
 
