@@ -6,7 +6,7 @@ from torch import optim
 
 import numpy as np
 import torch
-from torch import distributions
+from torch.distributions import Distribution
 
 from cs285.infrastructure import pytorch_util as ptu
 from cs285.policies.base_policy import BasePolicy
@@ -50,10 +50,11 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         else:
             self.logits_na = None
             self.mean_net = ptu.build_mlp(input_size=self.ob_dim,
-                                      output_size=self.ac_dim,
-                                      n_layers=self.n_layers, size=self.size)
+                                          output_size=self.ac_dim,
+                                          n_layers=self.n_layers, size=self.size)
             self.logstd = nn.Parameter(
-                torch.zeros(self.ac_dim, dtype=torch.float32, device=ptu.device)
+                torch.zeros(self.ac_dim, dtype=torch.float32,
+                            device=ptu.device)
             )
             self.mean_net.to(ptu.device)
             self.logstd.to(ptu.device)
@@ -98,6 +99,6 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # through it. For example, you can return a torch.FloatTensor. You can also
     # return more flexible objects, such as a
     # `torch.distributions.Distribution` object. It's up to you!
-    def forward(self, observation: torch.FloatTensor):
+    def forward(self, observation: torch.FloatTensor) -> Distribution:
         # TODO: get this from hw1 or hw2
         return action_distribution

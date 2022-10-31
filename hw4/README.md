@@ -12,8 +12,11 @@ You can run this code on your own machine or on Google Colab.
 
 The following files have blanks to be filled with your solutions from homework 1. The relevant sections are marked with `TODO: get this from Piazza'.
 
-- [infrastructure/rl_trainer.py](cs285/infrastructure/rl_trainer.py)
-- [infrastructure/utils.py](cs285/infrastructure/utils.py)
+- [x] [agents/sac_agent.py](cs285/agents/sac_agent.py) 
+- [x] [critics/sac_critic.py](cs285/critics/sac_critic.py)
+- [x] [infrastructure/rl_trainer.py](cs285/infrastructure/rl_trainer.py)
+- [x] [infrastructure/utils.py](cs285/infrastructure/utils.py)
+- [x] [policies/sac_policy.py](cs285/policies/sac_policy.py)
 
 You will then need to implement code in the following files:
 - [agents/mb_agent.py](cs285/agents/mb_agent.py)

@@ -1,10 +1,16 @@
-from .base_critic import BaseCritic
-from torch import nn
-from torch import optim
+from __future__ import annotations
+
+from typing import Tuple
+
 import numpy as np
+import torch as th
+from cs285.critics.base_critic import BaseCritic
 from cs285.infrastructure import pytorch_util as ptu
 from cs285.infrastructure import sac_utils
-import torch
+from numpy import ndarray
+from torch import Tensor, nn
+from torch import optim
+
 
 class SACCritic(nn.Module, BaseCritic):
     """
@@ -20,6 +26,7 @@ class SACCritic(nn.Module, BaseCritic):
         Note: batch self.size /n/ is defined at runtime.
         is None
     """
+
     def __init__(self, hparams):
         super(SACCritic, self).__init__()
         self.ob_dim = hparams['ob_dim']
@@ -54,10 +61,9 @@ class SACCritic(nn.Module, BaseCritic):
             self.learning_rate,
         )
 
-    def forward(self, obs: torch.Tensor, action: torch.Tensor):
-        # TODO: get this from previous HW
-        return values
+    def forward(self, obs: Tensor, action: Tensor) -> Tuple[Tensor, Tensor]:
+        obs_action = th.cat([obs, action], dim=-1)
+        q1 = self.Q1.forward(obs_action)
+        q2 = self.Q2.forward(obs_action)
 
-
-
-        
+        return [q1, q2]
