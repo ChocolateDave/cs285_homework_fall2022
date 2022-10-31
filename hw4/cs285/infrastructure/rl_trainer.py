@@ -5,11 +5,12 @@ import pickle
 import sys
 import time
 from collections import OrderedDict
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import gym
 import numpy as np
 import torch as th
+from cs285.agents.base_agent import BaseAgent
 from cs285.agents.mb_agent import MBAgent
 from cs285.agents.mbpo_agent import MBPOAgent
 from cs285.agents.sac_agent import SACAgent
@@ -19,8 +20,6 @@ from cs285.infrastructure import utils
 from cs285.infrastructure.logger import Logger
 from cs285.policies.base_policy import BasePolicy
 from gym import wrappers
-
-from hw4.cs285.agents.base_agent import BaseAgent
 
 
 register_envs()
@@ -70,7 +69,8 @@ class RL_Trainer(object):
             matplotlib.use('Agg')
 
         # Maximum length for episodes
-        self.params['ep_len'] = self.params['ep_len'] or self.env.spec.max_episode_steps
+        self.params['ep_len'] = self.params['ep_len'] or \
+            self.env.spec.max_episode_steps
         global MAX_VIDEO_LEN
         MAX_VIDEO_LEN = self.params['ep_len']
 
@@ -83,9 +83,10 @@ class RL_Trainer(object):
 
         # Observation and action sizes
 
-        ob_dim = self.env.observation_space.shape if img else self.env.observation_space.shape[
-            0]
-        ac_dim = self.env.action_space.n if discrete else self.env.action_space.shape[0]
+        ob_dim = self.env.observation_space.shape \
+            if img else self.env.observation_space.shape[0]
+        ac_dim = self.env.action_space.n \
+            if discrete else self.env.action_space.shape[0]
         self.params['agent_params']['ac_dim'] = ac_dim
         self.params['agent_params']['ob_dim'] = ob_dim
 
@@ -131,7 +132,8 @@ class RL_Trainer(object):
                 print("\n\n********** Iteration %i ************" % itr)
 
             # decide if videos should be rendered/logged at this iteration
-            if itr % self.params['video_log_freq'] == 0 and self.params['video_log_freq'] != -1:
+            if itr % self.params['video_log_freq'] == 0 \
+                    and self.params['video_log_freq'] != -1:
                 self.log_video = True
             else:
                 self.log_video = False
@@ -155,7 +157,8 @@ class RL_Trainer(object):
             self.total_envsteps += envsteps_this_batch
 
             # add collected data to replay buffer
-            if isinstance(self.agent, MBAgent) or isinstance(self.agent, MBPOAgent):
+            if isinstance(self.agent, MBAgent) or \
+                    isinstance(self.agent, MBPOAgent):
                 self.agent.add_to_replay_buffer(
                     paths, add_sl_noise=self.params['add_sl_noise'])
             else:
@@ -191,7 +194,9 @@ class RL_Trainer(object):
 
                 if self.params['save_params']:
                     self.agent.save(
-                        '{}/agent_itr_{}.pt'.format(self.params['logdir'], itr))
+                        '{}/agent_itr_{}.pt'.format(self.params['logdir'],
+                                                    itr)
+                    )
 
     ####################################
     ####################################
@@ -210,8 +215,10 @@ class RL_Trainer(object):
         :param num_transitions_to_sample:  the number of transitions we collect
         :return:
             paths: a list trajectories
-            envsteps_this_batch: the sum over the numbers of environment steps in paths
-            train_video_paths: paths which also contain videos for visualization purposes
+            envsteps_this_batch: the sum over the numbers of
+            environment steps in paths
+            train_video_paths: paths which also contain videos
+            for visualization purposes
         """
         if itr == 0:
             if initial_expertdata is not None:
@@ -223,13 +230,17 @@ class RL_Trainer(object):
             if isinstance(self.agent, SACAgent):
                 print('\nSampling seed steps for training...')
                 paths, envsteps_this_batch = utils.sample_random_trajectories(
-                    self.env, num_transitions_to_sample)
+                    self.env, num_transitions_to_sample, self.params['ep_len'])
                 return paths, envsteps_this_batch, None
 
         # Collect data to be used for training
         print('\nCollecting data to be used for training...')
-        paths, envsteps_this_batch = utils.sample_trajectory(
-            self.env, collect_policy, num_transitions_to_sample)
+        paths, envsteps_this_batch = utils.sample_trajectories(
+            self.env,
+            collect_policy,
+            num_transitions_to_sample,
+            self.params['ep_len']
+        )
 
         # Collect more rollouts with the same policy,
         # to be saved as videos in tensorboard
@@ -269,7 +280,12 @@ class RL_Trainer(object):
 
     ####################################
     ####################################
-    def perform_logging(self, itr, paths, eval_policy, train_video_paths, all_logs):
+    def perform_logging(self,
+                        itr: int,
+                        paths: List[Dict[str, np.ndarray]],
+                        eval_policy: BasePolicy,
+                        train_video_paths,
+                        all_logs: List[Dict[str, Any]]):
 
         last_log = all_logs[-1]
 
@@ -278,20 +294,34 @@ class RL_Trainer(object):
         # collect eval trajectories, for logging
         print("\nCollecting data for eval...")
         eval_paths, eval_envsteps_this_batch = utils.sample_trajectories(
-            self.env, eval_policy, self.params['eval_batch_size'], self.params['ep_len'])
+            self.env,
+            eval_policy,
+            self.params['eval_batch_size'],
+            self.params['ep_len']
+        )
 
         # save eval rollouts as videos in tensorboard event file
-        if self.log_video and train_video_paths != None:
+        if self.log_video and train_video_paths is not None:
             print('\nCollecting video rollouts eval')
             eval_video_paths = utils.sample_n_trajectories(
                 self.env, eval_policy, MAX_NVIDEO, MAX_VIDEO_LEN, True)
 
             # save train/eval videos
             print('\nSaving train rollouts as videos...')
-            self.logger.log_paths_as_videos(train_video_paths, itr, fps=self.fps, max_videos_to_save=MAX_NVIDEO,
-                                            video_title='train_rollouts')
-            self.logger.log_paths_as_videos(eval_video_paths, itr, fps=self.fps, max_videos_to_save=MAX_NVIDEO,
-                                            video_title='eval_rollouts')
+            self.logger.log_paths_as_videos(
+                train_video_paths,
+                itr,
+                fps=self.fps,
+                max_videos_to_save=MAX_NVIDEO,
+                video_title='train_rollouts'
+            )
+            self.logger.log_paths_as_videos(
+                eval_video_paths,
+                itr,
+                fps=self.fps,
+                max_videos_to_save=MAX_NVIDEO,
+                video_title='eval_rollouts'
+            )
 
         #######################
 
@@ -350,8 +380,12 @@ class RL_Trainer(object):
 
         # calculate and log model prediction error
         mpe, true_states, pred_states = utils.calculate_mean_prediction_error(
-            self.env, action_sequence, self.agent.dyn_models, self.agent.actor.data_statistics)
-        assert self.params['agent_params']['ob_dim'] == true_states.shape[1] == pred_states.shape[1]
+            self.env, action_sequence,
+            self.agent.dyn_models,
+            self.agent.actor.data_statistics
+        )
+        assert self.params['agent_params']['ob_dim'] == \
+            true_states.shape[1] == pred_states.shape[1]
         ob_dim = self.params['agent_params']['ob_dim']
         # skip last state for plotting when state dim is odd
         ob_dim = 2*int(ob_dim/2.0)
@@ -373,4 +407,7 @@ class RL_Trainer(object):
         self.fig.clf()
         plt.plot(all_losses)
         self.fig.savefig(
-            self.params['logdir']+'/itr_'+str(itr)+'_losses.png', dpi=200, bbox_inches='tight')
+            self.params['logdir']+'/itr_'+str(itr)+'_losses.png',
+            dpi=200,
+            bbox_inches='tight'
+        )

@@ -19,11 +19,22 @@ The following files have blanks to be filled with your solutions from homework 1
 - [x] [policies/sac_policy.py](cs285/policies/sac_policy.py)
 
 You will then need to implement code in the following files:
-- [agents/mb_agent.py](cs285/agents/mb_agent.py)
-- [models/ff_model.py](cs285/models/ff_model.py)
-- [policies/MPC_policy.py](cs285/policies/MPC_policy.py)
-- [infrastructure/rl_trainer.py](cs285/infrastructure/rl_trainer.py)
-- [agents/mbpo_agent.py](cs285/infrastructure/rl_trainer.py)
+- [x] Problem 1
+  - [x] [agents/mb_agent.py](cs285/agents/mb_agent.py)
+  - [x] [models/ff_model.py](cs285/models/ff_model.py)
+  - [x] [policies/MPC_policy.py](cs285/policies/MPC_policy.py)
+  - [x] [infrastructure/rl_trainer.py](cs285/infrastructure/rl_trainer.py)
+  - [x] [infrasturcture/utils.py](cs285/infrastructure/utils.py)
+- [ ] Problem 2
+  - [ ] [policies/MPC_policy.py](cs285/policies/MPC_policy.py)
+- [ ] Problem 3
+- [ ] Problem 4
+- [ ] Problem 5
+  - [ ] [policies/MPC_policy.py](cs285/policies/MPC_policy.py)
+- [ ] Problem 6
+  - [ ] [agents/mbpo_agent.py](cs285/infrastructure/rl_trainer.py)
+  - [ ] [infrastructure/rl_trainer.py](cs285/infrastructure/rl_trainer.py)
+
 
 The relevant sections are marked with `TODO`.
 

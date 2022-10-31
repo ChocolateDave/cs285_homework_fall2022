@@ -2,17 +2,21 @@ from __future__ import annotations
 
 import copy
 import time
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import gym
 import numpy as np
+from cs285.models.base_model import BaseModel
 from cs285.policies.base_policy import BasePolicy
 
 ############################################
 ############################################
 
 
-def calculate_mean_prediction_error(env, action_sequence, models, data_statistics):
+def calculate_mean_prediction_error(env: gym.Env,
+                                    action_sequence: np.ndarray,
+                                    models: List[BaseModel],
+                                    data_statistics: Any):
 
     model = models[0]
 
@@ -34,7 +38,7 @@ def calculate_mean_prediction_error(env, action_sequence, models, data_statistic
     return mpe, true_states, pred_states
 
 
-def perform_actions(env, actions):
+def perform_actions(env: gym.Env, actions: np.ndarray):
     ob = env.reset()
     obs, acs, rewards, next_obs, terminals, image_obs = [], [], [], [], [], []
     steps = 0
@@ -180,7 +184,8 @@ def convert_listofrollouts(paths):
     """
         Take a list of rollout dictionaries
         and return separate arrays,
-        where each array is a concatenation of that array from across the rollouts
+        where each array is a concatenation of that array
+        from across the rollouts
     """
     observations = np.concatenate([path["observation"] for path in paths])
     actions = np.concatenate([path["action"] for path in paths])
@@ -189,7 +194,9 @@ def convert_listofrollouts(paths):
     terminals = np.concatenate([path["terminal"] for path in paths])
     concatenated_rewards = np.concatenate([path["reward"] for path in paths])
     unconcatenated_rewards = [path["reward"] for path in paths]
-    return observations, actions, next_observations, terminals, concatenated_rewards, unconcatenated_rewards
+
+    return (observations, actions, next_observations, terminals,
+            concatenated_rewards, unconcatenated_rewards)
 
 ############################################
 ############################################
