@@ -111,7 +111,7 @@ class MPCPolicy(BasePolicy):
 
             # Set `cem_action` to the appropriate action
             # chosen by CEM
-            cem_action = cem_mean
+            cem_action = cem_loc
 
             return cem_action[None]
         else:

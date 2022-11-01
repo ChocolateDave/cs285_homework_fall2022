@@ -1,4 +1,7 @@
-from cs285.infrastructure.utils import *
+from __future__ import annotations
+
+from cs285.infrastructure.utils import (
+    add_noise, convert_listofrollouts, get_pathlength, np)
 
 
 class ReplayBuffer(object):
@@ -7,11 +10,11 @@ class ReplayBuffer(object):
 
         self.max_size = max_size
         self.paths = []
-        self.obs = None
-        self.acs = None
-        self.concatenated_rews = None
-        self.next_obs = None
-        self.terminals = None
+        self.obs: np.ndarray = None
+        self.acs: np.ndarray = None
+        self.concatenated_rews: np.ndarray = None
+        self.next_obs: np.ndarray = None
+        self.terminals: np.ndarray = None
 
     def add_rollouts(self, paths, noised=False):
 
@@ -19,8 +22,11 @@ class ReplayBuffer(object):
         for path in paths:
             self.paths.append(path)
 
-        # convert new rollouts into their component arrays, and append them onto our arrays
-        observations, actions, next_observations, terminals, concatenated_rews, unconcatenated_rews = convert_listofrollouts(paths)
+        # convert new rollouts into their component arrays,
+        # and append them onto our arrays
+        observations, actions, next_observations, terminals, \
+            concatenated_rews, unconcatenated_rews = \
+            convert_listofrollouts(paths)
 
         if noised:
             observations = add_noise(observations)
@@ -33,7 +39,8 @@ class ReplayBuffer(object):
             self.terminals = terminals[-self.max_size:]
             self.concatenated_rews = concatenated_rews[-self.max_size:]
         else:
-            self.obs = np.concatenate([self.obs, observations])[-self.max_size:]
+            self.obs = np.concatenate(
+                [self.obs, observations])[-self.max_size:]
             self.acs = np.concatenate([self.acs, actions])[-self.max_size:]
             self.next_obs = np.concatenate(
                 [self.next_obs, next_observations]
@@ -58,25 +65,43 @@ class ReplayBuffer(object):
     ########################################
     ########################################
 
-    def sample_random_data(self, batch_size):
+    def sample_random_data(self, batch_size: int):
 
-        assert self.obs.shape[0] == self.acs.shape[0] == self.concatenated_rews.shape[0] == self.next_obs.shape[0] == self.terminals.shape[0]
+        assert self.obs.shape[0] == \
+            self.acs.shape[0] == \
+            self.concatenated_rews.shape[0] == \
+            self.next_obs.shape[0] == \
+            self.terminals.shape[0]
         rand_indices = np.random.permutation(self.obs.shape[0])[:batch_size]
-        return self.obs[rand_indices], self.acs[rand_indices], self.concatenated_rews[rand_indices], self.next_obs[rand_indices], self.terminals[rand_indices]
+        return (self.obs[rand_indices],
+                self.acs[rand_indices],
+                self.concatenated_rews[rand_indices],
+                self.next_obs[rand_indices],
+                self.terminals[rand_indices])
 
     def sample_recent_data(self, batch_size=1, concat_rew=True):
 
         if concat_rew:
-            return self.obs[-batch_size:], self.acs[-batch_size:], self.concatenated_rews[-batch_size:], self.next_obs[-batch_size:], self.terminals[-batch_size:]
+            return self.obs[-batch_size:], \
+                self.acs[-batch_size:], \
+                self.concatenated_rews[-batch_size:], \
+                self.next_obs[-batch_size:], \
+                self.terminals[-batch_size:]
         else:
             num_recent_rollouts_to_return = 0
             num_datapoints_so_far = 0
             index = -1
             while num_datapoints_so_far < batch_size:
                 recent_rollout = self.paths[index]
-                index -=1
-                num_recent_rollouts_to_return +=1
+                index -= 1
+                num_recent_rollouts_to_return += 1
                 num_datapoints_so_far += get_pathlength(recent_rollout)
             rollouts_to_return = self.paths[-num_recent_rollouts_to_return:]
-            observations, actions, next_observations, terminals, concatenated_rews, unconcatenated_rews = convert_listofrollouts(rollouts_to_return)
-            return observations, actions, unconcatenated_rews, next_observations, terminals
+            observations, actions, next_observations, terminals, \
+                concatenated_rews, unconcatenated_rews = \
+                convert_listofrollouts(rollouts_to_return)
+            return observations, \
+                actions, \
+                unconcatenated_rews, \
+                next_observations, \
+                terminals

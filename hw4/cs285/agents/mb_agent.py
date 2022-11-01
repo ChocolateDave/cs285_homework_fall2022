@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from cs285.agents.base_agent import BaseAgent
 from cs285.infrastructure.replay_buffer import ReplayBuffer
-from cs285.infrastructure.utils import Any, Dict, List, gym, np
+from cs285.infrastructure.utils import Any, Dict, List, Tuple, gym, np
 from cs285.models.ff_model import FFModel
 from cs285.policies.MPC_policy import MPCPolicy
 
@@ -71,7 +71,9 @@ class MBAgent(BaseAgent):
             'Training Loss': avg_loss,
         }
 
-    def add_to_replay_buffer(self, paths, add_sl_noise=False):
+    def add_to_replay_buffer(self,
+                             paths: List[Dict[str, Any]],
+                             add_sl_noise: bool = False) -> None:
 
         # add data to replay buffer
         self.replay_buffer.add_rollouts(paths, noised=add_sl_noise)
@@ -92,7 +94,7 @@ class MBAgent(BaseAgent):
         # so actor.get_action can be calculated correctly
         self.actor.data_statistics = self.data_statistics
 
-    def sample(self, batch_size):
+    def sample(self, batch_size: int) -> Tuple:
         # NOTE: sampling batch_size * ensemble_size,
         # so each model in our ensemble can get trained on batch_size data
         return self.replay_buffer.sample_random_data(
