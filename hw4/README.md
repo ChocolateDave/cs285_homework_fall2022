@@ -25,12 +25,12 @@ You will then need to implement code in the following files:
   - [x] [policies/MPC_policy.py](cs285/policies/MPC_policy.py)
   - [x] [infrastructure/rl_trainer.py](cs285/infrastructure/rl_trainer.py)
   - [x] [infrasturcture/utils.py](cs285/infrastructure/utils.py)
-- [ ] Problem 2
-  - [ ] [policies/MPC_policy.py](cs285/policies/MPC_policy.py)
-- [ ] Problem 3
-- [ ] Problem 4
-- [ ] Problem 5
-  - [ ] [policies/MPC_policy.py](cs285/policies/MPC_policy.py)
+- [x] Problem 2
+  - [x] [policies/MPC_policy.py](cs285/policies/MPC_policy.py)
+- [x] Problem 3
+- [x] Problem 4
+- [x] Problem 5
+  - [x] [policies/MPC_policy.py](cs285/policies/MPC_policy.py)
 - [ ] Problem 6
   - [ ] [agents/mbpo_agent.py](cs285/infrastructure/rl_trainer.py)
   - [ ] [infrastructure/rl_trainer.py](cs285/infrastructure/rl_trainer.py)

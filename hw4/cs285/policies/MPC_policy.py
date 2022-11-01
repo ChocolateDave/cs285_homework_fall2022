@@ -71,12 +71,19 @@ class MPCPolicy(BasePolicy):
             return random_action_sequences
 
         elif self.sample_strategy == 'cem':
-            # TODO(Q5): Implement action selection using CEM.
+            # Implement action selection using CEM.
             # Begin with randomly selected actions,
             # then refine the sampling distribution
             # iteratively as described in Section 3.3,
             # "Iterative Random-Shooting with Refinement" of
             # https://arxiv.org/pdf/1909.11652.pdf
+            cem_action = np.random.uniform(
+                low=self.low,
+                high=self.high,
+                size=(num_sequences, horizon, self.ac_dim)
+            )
+            cem_loc = self.cem_alpha * cem_action.mean(0)
+            cem_scale = self.cem_alpha * cem_action.std(0)
             for i in range(self.cem_iterations):
                 # - Sample candidate sequences from a Gaussian with the current
                 #   elite mean and variance
@@ -88,11 +95,23 @@ class MPCPolicy(BasePolicy):
                 #       rewards for our candidate sequences in order
                 #       to rank them?)
                 # - Update the elite mean and variance
-                pass
+                cem_action = np.random.normal(
+                    loc=cem_loc,
+                    scale=cem_scale,
+                    size=(num_sequences, horizon, self.ac_dim)
+                )
+                cem_action = np.clip(cem_action, self.low, self.high)
+                elite_idcs = np.argsort(self.evaluate_candidate_sequences(
+                    cem_action, obs))[-self.cem_num_elites:]
+                cem_action = cem_action[elite_idcs]
+                cem_loc = self.cem_alpha * cem_action.mean(0) + \
+                    (1 - self.cem_alpha) * cem_loc
+                cem_scale = self.cem_alpha * cem_action.std(0) + \
+                    (1 - self.cem_alpha) * cem_scale
 
-            # TODO(Q5): Set `cem_action` to the appropriate action
+            # Set `cem_action` to the appropriate action
             # chosen by CEM
-            cem_action = None
+            cem_action = cem_mean
 
             return cem_action[None]
         else:
@@ -101,7 +120,7 @@ class MPCPolicy(BasePolicy):
     def evaluate_candidate_sequences(self,
                                      candidate_action_sequences: np.ndarray,
                                      obs: np.ndarray) -> np.ndarray:
-        # TODO(Q2): for each model in ensemble, compute the predicted sum of
+        # For each model in ensemble, compute the predicted sum of
         # rewards for each candidate action sequence.
         #
         # Then, return the mean predictions across all ensembles.
