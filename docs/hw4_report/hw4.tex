@@ -131,10 +131,10 @@ Based on the results in \hyperref[fig:1]{Figure 1}, training with a neural netwo
     \centering
     \includegraphics[width=\textwidth]{q4.png}
     \caption{Average evaluation returns with different settings of (a) number of ensemble models; (b) model predictive control horizons; and (c) number of generated action sequence.}
-    \label{fig: 4}
+    \label{fig:4}
 \end{figure}
 
-Based on the results in \hyperref[fig: 4]{Figure 4}, increasing the number of ensemble models (as shown in 4(a)) helps improve the performance but not much. Increasing prediction horizon would cause leads to higher estimation variance and prediction uncertainty, hence deteriorate the performance (as shown in 4(b)). Increasing number of generated action sequence helps explore more potential actions, which increases the possibility of achieving better score (as shown in 4(c)). 
+Based on the results in \hyperref[fig:4]{Figure 4}, increasing the number of ensemble models (as shown in 4(a)) helps improve the performance but not much. Increasing prediction horizon would cause leads to higher estimation variance and prediction uncertainty, hence deteriorate the performance (as shown in 4(b)). Increasing number of generated action sequence helps explore more potential actions, which increases the possibility of achieving better score (as shown in 4(c)). 
 
 \textbf{Codes are left out on purpose due to limited space.}
 
@@ -146,10 +146,36 @@ Based on the results in \hyperref[fig: 4]{Figure 4}, increasing the number of en
     \centering
     \includegraphics[width=\textwidth]{q5.png}
     \caption{Average evalutaion returns with different action selection settings. Model with 4 CEM action sampling iterations achieves the best performance at around 765.5. However, implementing 2 CEM iterations achieves lower returns than random one in my experiement. My explannation for it is that CEM performance could be affected by the initial action sequence guess. And in my case, taking only 2 CEM iterations is not sufficient to guarentee that sampled actions are the optimal.}
+    \label{fig:5}
 \end{figure}
+
+\begin{lstlisting}
+    echo "Running Homework 4 Problem 5"
+    python cs285/scripts/run_hw4_mb.py --exp_name q5_cheetah_random --env_name cheetah-cs285-v0 --mpc_horizon 15 --add_sl_noise --num_agent_train_steps_per_iter 1500 --batch_size_initial 5000 --batch_size 5000 --n_iter 5 --video_log_freq -1 --mpc_action_sampling_strategy random -gpu_id $1 &
+    python cs285/scripts/run_hw4_mb.py --exp_name q5_cheetah_cem_2 --env_name cheetah-cs285-v0 --mpc_horizon 15 --add_sl_noise --num_agent_train_steps_per_iter 1500 --batch_size_initial 5000 --batch_size 5000 --n_iter 5 --video_log_freq -1 --mpc_action_sampling_strategy cem --cem_iterations 2 -gpu_id $1 &
+    python cs285/scripts/run_hw4_mb.py --exp_name q5_cheetah_cem_4 --env_name cheetah-cs285-v0 --mpc_horizon 15 --add_sl_noise --num_agent_train_steps_per_iter 1500 --batch_size_initial 5000 --batch_size 5000 --n_iter 5 --video_log_freq -1 --mpc_action_sampling_strategy cem --cem_iterations 4 -gpu_id $1 &
+    wait
+    echo "Done!"
+\end{lstlisting}
 
 \pagebreak
 % Problem 6
 \section*{Problem 6}
+
+\begin{figure}[thbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{q6.png}
+    \caption{Results of with three different settings. As expected the Model-free SAC perform the worst among three, followed by Dyna style single-step rollouts. This means adding only single-step rollouts from the model has limited improvement. On the other hand, MBPO with 10-step rollouts significantly improves the long-term performance, proving the dynamic model has successfully learned the observed dynamic.}
+    \label{fig:6}
+\end{figure}
+
+\begin{lstlisting}
+    echo "Running Homework 6"
+    python cs285/scripts/run_hw4_mbpo.py --exp_name q6_cheetah_rlenl0 --env_name cheetah-cs285-v0 --add_sl_noise --num_agent_train_steps_per_iter 1500 --batch_size_initial 5000 --batch_size 5000 --n_iter 10 --video_log_freq -1 --sac_discount 0.99 --sac_n_layers 2 --sac_size 256 --sac_batch_size 1500 --sac_learning_rate 0.0003 --sac_init_temperature 0.1 --sac_n_iter 1000 --mbpo_rollout_length 0 -gpu_id $1 &
+    python cs285/scripts/run_hw4_mbpo.py --exp_name q6_cheetah_rlen1 --env_name cheetah-cs285-v0 --add_sl_noise --num_agent_train_steps_per_iter 1500 --batch_size_initial 5000 --batch_size 5000 --n_iter 10 --video_log_freq -1 --sac_discount 0.99 --sac_n_layers 2 --sac_size 256 --sac_batch_size 1500 --sac_learning_rate 0.0003 --sac_init_temperature 0.1 --sac_n_iter 5000 --mbpo_rollout_length 1 -gpu_id $1 &
+    python cs285/scripts/run_hw4_mbpo.py --exp_name q6_cheetah_rlen10 --env_name cheetah-cs285-v0 --add_sl_noise --num_agent_train_steps_per_iter 1500 --batch_size_initial 5000 --batch_size 5000 --n_iter 10 --video_log_freq -1 --sac_discount 0.99 --sac_n_layers 2 --sac_size 256 --sac_batch_size 1500 --sac_learning_rate 0.0003 --sac_init_temperature 0.1 --sac_n_iter 5000 --mbpo_rollout_length 10 -gpu_id $1 &
+    wait
+    echo "Done!"
+\end{lstlisting}
 
 \end{document}
