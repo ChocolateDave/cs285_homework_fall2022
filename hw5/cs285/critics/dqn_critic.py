@@ -1,11 +1,13 @@
-from .base_critic import BaseCritic
+from __future__ import annotations
+
 import torch
 import torch.optim as optim
-from torch.nn import utils
-from torch import nn
-import pdb
-
+from cs285.critics.base_critic import BaseCritic
 from cs285.infrastructure import pytorch_util as ptu
+from torch import nn
+from torch.nn import utils
+
+# import pdb
 
 
 class DQNCritic(BaseCritic):
@@ -44,16 +46,20 @@ class DQNCritic(BaseCritic):
     def update(self, ob_no, ac_na, next_ob_no, reward_n, terminal_n):
         """
             Update the parameters of the critic.
-            let sum_of_path_lengths be the sum of the lengths of the paths sampled from
+            let sum_of_path_lengths be the sum of the
+            lengths of the paths sampled from
                 Agent.sample_trajectories
-            let num_paths be the number of paths sampled from Agent.sample_trajectories
+            let num_paths be the number of paths sampled from
+                Agent.sample_trajectories
             arguments:
                 ob_no: shape: (sum_of_path_lengths, ob_dim)
-                next_ob_no: shape: (sum_of_path_lengths, ob_dim). The observation after taking one step forward
-                reward_n: length: sum_of_path_lengths. Each element in reward_n is a scalar containing
-                    the reward for each timestep
-                terminal_n: length: sum_of_path_lengths. Each element in terminal_n is either 1 if the episode ended
-                    at that timestep of 0 if the episode did not end
+                next_ob_no: shape: (sum_of_path_lengths, ob_dim).
+                The observation after taking one step forward
+                reward_n: length: sum_of_path_lengths. Each element in
+                reward_n is a scalar containing the reward for each timestep
+                terminal_n: length: sum_of_path_lengths. Each element in
+                terminal_n is either 1 if the episode ended at that
+                timestep of 0 if the episode did not end
             returns:
                 nothing
         """
@@ -64,24 +70,27 @@ class DQNCritic(BaseCritic):
         terminal_n = ptu.from_numpy(terminal_n)
 
         qa_t_values = self.q_net(ob_no)
-        q_t_values = torch.gather(qa_t_values, 1, ac_na.unsqueeze(1)).squeeze(1)
+        q_t_values = torch.gather(
+            qa_t_values, 1, ac_na.unsqueeze(1)).squeeze(1)
         qa_tp1_values = self.q_net_target(next_ob_no)
 
         if self.double_q:
             next_actions = self.q_net(next_ob_no).argmax(dim=1)
-            q_tp1 = torch.gather(qa_tp1_values, 1, next_actions.unsqueeze(1)).squeeze(1)
+            q_tp1 = torch.gather(
+                qa_tp1_values, 1, next_actions.unsqueeze(1)).squeeze(1)
         else:
             q_tp1, _ = qa_tp1_values.max(dim=1)
 
         target = reward_n + self.gamma * q_tp1 * (1 - terminal_n)
         target = target.detach()
         loss = self.loss(q_t_values, target)
-    
+
         self.optimizer.zero_grad()
         loss.backward()
-        utils.clip_grad_value_(self.q_net.parameters(), self.grad_norm_clipping)
+        utils.clip_grad_value_(self.q_net.parameters(),
+                               self.grad_norm_clipping)
         self.optimizer.step()
-        
+
         self.learning_rate_scheduler.step()
 
         return {'Training Loss': ptu.to_numpy(loss)}

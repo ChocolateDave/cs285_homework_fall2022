@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import itertools
 from torch import nn
@@ -50,10 +52,12 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         else:
             self.logits_na = None
             self.mean_net = ptu.build_mlp(input_size=self.ob_dim,
-                                      output_size=self.ac_dim,
-                                      n_layers=self.n_layers, size=self.size)
+                                          output_size=self.ac_dim,
+                                          n_layers=self.n_layers,
+                                          size=self.size)
             self.logstd = nn.Parameter(
-                torch.zeros(self.ac_dim, dtype=torch.float32, device=ptu.device)
+                torch.zeros(self.ac_dim, dtype=torch.float32,
+                            device=ptu.device)
             )
             self.mean_net.to(ptu.device)
             self.logstd.to(ptu.device)
@@ -143,6 +147,7 @@ class MLPPolicyAC(MLPPolicy):
     ####################################
     ####################################
 
+
 class MLPPolicyAWAC(MLPPolicy):
     def __init__(self,
                  ac_dim,
@@ -157,8 +162,9 @@ class MLPPolicyAWAC(MLPPolicy):
                  **kwargs,
                  ):
         self.lambda_awac = lambda_awac
-        super().__init__(ac_dim, ob_dim, n_layers, size, discrete, learning_rate, training, nn_baseline, **kwargs)
-    
+        super().__init__(ac_dim, ob_dim, n_layers, size, discrete,
+                         learning_rate, training, nn_baseline, **kwargs)
+
     def update(self, observations, actions, adv_n=None):
         if adv_n is None:
             assert False
@@ -172,5 +178,5 @@ class MLPPolicyAWAC(MLPPolicy):
         # TODO update the policy network utilizing AWAC update
 
         actor_loss = None
-        
+
         return actor_loss.item()
