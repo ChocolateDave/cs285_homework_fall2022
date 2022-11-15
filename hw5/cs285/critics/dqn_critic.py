@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any, Dict
+
 import torch
 import torch.optim as optim
 from cs285.critics.base_critic import BaseCritic
@@ -12,7 +14,10 @@ from torch.nn import utils
 
 class DQNCritic(BaseCritic):
 
-    def __init__(self, hparams, optimizer_spec, **kwargs):
+    def __init__(self,
+                 hparams: Dict[str, Any],
+                 optimizer_spec: Dict[str, Any],
+                 **kwargs) -> None:
         super().__init__(**kwargs)
         self.env_name = hparams['env_name']
         self.ob_dim = hparams['ob_dim']

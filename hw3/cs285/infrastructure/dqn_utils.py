@@ -1,17 +1,17 @@
 """This file includes a collection of utility functions that are useful for
 implementing DQN."""
+from __future__ import annotations
+
 import random
 from collections import namedtuple
 
 import gym
 import numpy as np
-from torch import nn
+import torch
 import torch.optim as optim
-
 from cs285.infrastructure.atari_wrappers import wrap_deepmind
 from gym.envs.registration import register
-
-import torch
+from torch import nn
 
 
 class Flatten(torch.nn.Module):

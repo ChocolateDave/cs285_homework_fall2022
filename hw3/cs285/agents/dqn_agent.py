@@ -1,13 +1,16 @@
+from __future__ import annotations
+
+from typing import Any, Dict, List, Tuple
+
 import gym
 import numpy as np
-
+from cs285.critics.dqn_critic import DQNCritic
 from cs285.infrastructure.dqn_utils import MemoryOptimizedReplayBuffer
 from cs285.policies.argmax_policy import ArgMaxPolicy
-from cs285.critics.dqn_critic import DQNCritic
 
 
 class DQNAgent(object):
-    def __init__(self, env, agent_params):
+    def __init__(self, env: gym.Env, agent_params: Dict[str, Any]) -> None:
 
         self.env: gym.Env = env
         self.agent_params = agent_params
@@ -36,10 +39,10 @@ class DQNAgent(object):
         self.t = 0
         self.num_param_updates = 0
 
-    def add_to_replay_buffer(self, paths):
+    def add_to_replay_buffer(self, paths: List[Dict[str, np.ndarray]]) -> None:
         pass
 
-    def step_env(self):
+    def step_env(self) -> None:
         """
             Step the env and store the transition
             At the end of this block of code, the simulator should have been
@@ -98,13 +101,18 @@ class DQNAgent(object):
         if done:
             self.last_obs = self.env.reset()
 
-    def sample(self, batch_size):
+    def sample(self, batch_size: int) -> Tuple[List, List, List, List, List]:
         if self.replay_buffer.can_sample(self.batch_size):
             return self.replay_buffer.sample(batch_size)
         else:
             return [], [], [], [], []
 
-    def train(self, ob_no, ac_na, re_n, next_ob_no, terminal_n):
+    def train(self,
+              ob_no: np.ndarray,
+              ac_na: np.ndarray,
+              re_n: np.ndarray,
+              next_ob_no: np.ndarray,
+              terminal_n: np.ndarray) -> Dict[str, Any]:
         log = {}
         if (
             self.t > self.learning_starts

@@ -1,19 +1,23 @@
 from __future__ import annotations
 
 import numpy as np
+from cs285.critics.base_critic import BaseCritic
+
 # import pdb
 
 
 class ArgMaxPolicy(object):
 
-    def __init__(self, critic, use_boltzmann=False):
+    def __init__(self,
+                 critic: BaseCritic,
+                 use_boltzmann: bool = False) -> None:
         self.critic = critic
         self.use_boltzmann = use_boltzmann
 
-    def set_critic(self, critic):
+    def set_critic(self, critic: BaseCritic) -> None:
         self.critic = critic
 
-    def get_action(self, obs):
+    def get_action(self, obs: np.ndarray) -> np.ndarray:
         # MJ: changed the dimension check to a 3
         if len(obs.shape) > 3:
             observation = obs
@@ -32,7 +36,7 @@ class ArgMaxPolicy(object):
 
         return action[0]
 
-    def sample_discrete(self, p):
+    def sample_discrete(self, p: np.ndarray) -> np.ndarray:
         # https://stackoverflow.com/questions/40474436/how-to-apply-numpy-random-choice-to-a-matrix-of-probability-values-vectorized-s
         c = p.cumsum(axis=1)
         u = np.random.rand(len(c), 1)
