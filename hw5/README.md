@@ -32,8 +32,8 @@ The following files have blanks to be filled with your solutions from homework 1
 You will then need to implement code in the following files:
 
 For RND + CQL:
-- [ ] [exploration/rnd_model.py](cs285/exploration/rnd_model.py)
-- [ ] [agents/explore_or_exploit_agent.py](cs285/agents/explore_or_exploit_agent.py)
+- [x] [exploration/rnd_model.py](cs285/exploration/rnd_model.py)
+- [x] [agents/explore_or_exploit_agent.py](cs285/agents/explore_or_exploit_agent.py)
 - [ ] [critics/cql_critic.py](cs285/critics/cql_critic.py)
 
 For AWAC: 

@@ -1,16 +1,23 @@
-from .base_critic import BaseCritic
-import torch
-import torch.optim as optim
-from torch.nn import utils
-from torch import nn
-import pdb
+from __future__ import annotations
 
-from cs285.infrastructure import pytorch_util as ptu
+from typing import Any, Dict, Tuple
+
+import cs285.infrastructure.pytorch_util as ptu
+import torch as th
+import torch.optim as optim
+from cs285.critics.base_critic import BaseCritic
+from cs285.infrastructure.dqn_utils import OptimizerSpec
+from torch import nn
+
+# import pdb
 
 
 class CQLCritic(BaseCritic):
 
-    def __init__(self, hparams, optimizer_spec, **kwargs):
+    def __init__(self,
+                 hparams: Dict[str, Any],
+                 optimizer_spec: OptimizerSpec,
+                 **kwargs) -> None:
         super().__init__(**kwargs)
         self.env_name = hparams['env_name']
         self.ob_dim = hparams['ob_dim']
@@ -29,7 +36,7 @@ class CQLCritic(BaseCritic):
         network_initializer = hparams['q_func']
         self.q_net = network_initializer(self.ob_dim, self.ac_dim)
         self.q_net_target = network_initializer(self.ob_dim, self.ac_dim)
-        self.optimizer = self.optimizer_spec.constructor(
+        self.optimizer: optim.Optimizer = self.optimizer_spec.constructor(
             self.q_net.parameters(),
             **self.optimizer_spec.optim_kwargs
         )
@@ -42,52 +49,78 @@ class CQLCritic(BaseCritic):
         self.q_net_target.to(ptu.device)
         self.cql_alpha = hparams['cql_alpha']
 
-    def dqn_loss(self, ob_no, ac_na, next_ob_no, reward_n, terminal_n):
-        """ Implement DQN Loss """
+    def dqn_loss(self,
+                 ob_no: th.Tensor,
+                 ac_na: th.Tensor,
+                 next_ob_no: th.Tensor,
+                 reward_n: th.Tensor,
+                 terminal_n: th.Tensor
+                 ) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
+        # TODO: Implement TD-error DQN loss with double q-learning
+        if reward_n.dim() == 1:
+            reward_n = reward_n.view(-1, 1)
+        if terminal_n.dim() == 1:
+            terminal_n = terminal_n.view(-1, 1)
+
+        qa_t_values = self.q_net.forward(ob_no)
+        q_t_values = th.gather(qa_t_values, 1, ac_na.unsqueeze(1))
+
+        qa_t_values_tar = self.q_net_target.forward(next_ob_no)
+        next_ac_na = self.q_net.forward(next_ob_no).argmax(1)  # double q
+        q_t_values_tar = th.gather(qa_t_values_tar, 1, next_ac_na.unsqueeze(1))
+
+        bellman_tar = reward_n + self.gamma * (1 - terminal_n) * q_t_values_tar
+        loss = self.loss.forward(q_t_values, bellman_tar.detach())
 
         return loss, qa_t_values, q_t_values
 
+    def update(self, ob_no, ac_na, next_ob_no, reward_n, terminal_n) -> None:
+        """Update the parameters of the critic.
 
-    def update(self, ob_no, ac_na, next_ob_no, reward_n, terminal_n):
-        """
-            Update the parameters of the critic.
-            let sum_of_path_lengths be the sum of the lengths of the paths sampled from
-                Agent.sample_trajectories
-            let num_paths be the number of paths sampled from Agent.sample_trajectories
-            arguments:
-                ob_no: shape: (sum_of_path_lengths, ob_dim)
-                next_ob_no: shape: (sum_of_path_lengths, ob_dim). The observation after taking one step forward
-                reward_n: length: sum_of_path_lengths. Each element in reward_n is a scalar containing
-                    the reward for each timestep
-                terminal_n: length: sum_of_path_lengths. Each element in terminal_n is either 1 if the episode ended
-                    at that timestep of 0 if the episode did not end
-            returns:
-                nothing
+        let `sum_of_path_lengths` be the sum of the lengths of the paths
+        sampled from Agent.sample_trajectories.
+        let `num_paths` be the number of paths sampled from
+        Agent.sample_trajectories
+
+        Args:
+            ob_no: shape: (sum_of_path_lengths, ob_dim)
+            next_ob_no: shape: (sum_of_path_lengths, ob_dim). The observation
+            after taking one step forward
+            reward_n: length: sum_of_path_lengths. Each element in `reward_n`
+            is a scalar containing the reward for each timestep
+            terminal_n: length: sum_of_path_lengths. Each element in
+            `terminal_n` is either 1 if the episode ended at that timestep
+            or 0 if the episode did not end
         """
         ob_no = ptu.from_numpy(ob_no)
-        ac_na = ptu.from_numpy(ac_na).to(torch.long)
+        ac_na = ptu.from_numpy(ac_na).to(th.long)
         next_ob_no = ptu.from_numpy(next_ob_no)
         reward_n = ptu.from_numpy(reward_n)
         terminal_n = ptu.from_numpy(terminal_n)
 
-        # Compute the DQN Loss 
+        # Compute the DQN Loss
         loss, qa_t_values, q_t_values = self.dqn_loss(
             ob_no, ac_na, next_ob_no, reward_n, terminal_n
-            )
-        
+        )
+
         # CQL Implementation
-        # TODO: Implement CQL as described in the pdf and paper
+        # NOTE: Implement CQL as described in the pdf and paper
         # Hint: After calculating cql_loss, augment the loss appropriately
-        q_t_logsumexp = None
-        cql_loss = None
+        q_t_logsumexp = th.logsumexp(qa_t_values, dim=1)
+        cql_loss = (q_t_logsumexp - q_t_values.detach()).mean()
+
+        self.optimizer.zero_grad()
+        loss = loss + self.cql_alpha * cql_loss
+        loss.backward()
+        self.optimizer.step()
 
         info = {'Training Loss': ptu.to_numpy(loss)}
 
-        # TODO: Uncomment these lines after implementing CQL
-        # info['CQL Loss'] = ptu.to_numpy(cql_loss)
-        # info['Data q-values'] = ptu.to_numpy(q_t_values).mean()
-        # info['OOD q-values'] = ptu.to_numpy(q_t_logsumexp).mean()
-        
+        # NOTE: Uncomment these lines after implementing CQL
+        info['CQL Loss'] = ptu.to_numpy(cql_loss)
+        info['Data q-values'] = ptu.to_numpy(q_t_values).mean()
+        info['OOD q-values'] = ptu.to_numpy(q_t_logsumexp).mean()
+
         self.learning_rate_scheduler.step()
 
         return info

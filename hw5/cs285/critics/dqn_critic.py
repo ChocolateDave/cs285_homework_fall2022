@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
+import cs285.infrastructure.pytorch_util as ptu
 import torch
 import torch.optim as optim
 from cs285.critics.base_critic import BaseCritic
-from cs285.infrastructure import pytorch_util as ptu
 from torch import nn
 from torch.nn import utils
 

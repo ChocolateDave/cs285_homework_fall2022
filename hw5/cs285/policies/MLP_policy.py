@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 import itertools
 from torch import nn
-from torch.nn import functional as F
 from torch import optim
 
 import numpy as np
