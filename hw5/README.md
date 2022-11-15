@@ -34,7 +34,7 @@ You will then need to implement code in the following files:
 For RND + CQL:
 - [x] [exploration/rnd_model.py](cs285/exploration/rnd_model.py)
 - [x] [agents/explore_or_exploit_agent.py](cs285/agents/explore_or_exploit_agent.py)
-- [ ] [critics/cql_critic.py](cs285/critics/cql_critic.py)
+- [x] [critics/cql_critic.py](cs285/critics/cql_critic.py)
 
 For AWAC: 
 - [ ] [agents/awac_agent.py](cs285/agents/awac_agent.py)

@@ -64,7 +64,7 @@ class RNDModel(nn.Module, BaseExplorationModel):
         error = self.forward(ob_no)
         return ptu.to_numpy(error)
 
-    def update(self, ob_no: th.Tensor) -> Dict[str, np.ndarray]:
+    def update(self, ob_no: th.Tensor) -> np.ndarray:
         # NOTE: Update f_hat using ob_no
         # Hint: Take the mean prediction error across the batch
         if isinstance(ob_no, np.ndarray):
@@ -74,4 +74,4 @@ class RNDModel(nn.Module, BaseExplorationModel):
         loss.backward()
         self.optimizer.step()
 
-        return {'Training Loss': ptu.to_numpy(loss)}
+        return ptu.to_numpy(loss)
