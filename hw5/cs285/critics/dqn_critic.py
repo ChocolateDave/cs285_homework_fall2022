@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 import cs285.infrastructure.pytorch_util as ptu
-import torch
+import numpy as np
+import torch as th
 import torch.optim as optim
 from cs285.critics.base_critic import BaseCritic
 from torch import nn
@@ -69,19 +70,19 @@ class DQNCritic(BaseCritic):
                 nothing
         """
         ob_no = ptu.from_numpy(ob_no)
-        ac_na = ptu.from_numpy(ac_na).to(torch.long)
+        ac_na = ptu.from_numpy(ac_na).to(th.long)
         next_ob_no = ptu.from_numpy(next_ob_no)
         reward_n = ptu.from_numpy(reward_n)
         terminal_n = ptu.from_numpy(terminal_n)
 
         qa_t_values = self.q_net(ob_no)
-        q_t_values = torch.gather(
+        q_t_values = th.gather(
             qa_t_values, 1, ac_na.unsqueeze(1)).squeeze(1)
         qa_tp1_values = self.q_net_target(next_ob_no)
 
         if self.double_q:
             next_actions = self.q_net(next_ob_no).argmax(dim=1)
-            q_tp1 = torch.gather(
+            q_tp1 = th.gather(
                 qa_tp1_values, 1, next_actions.unsqueeze(1)).squeeze(1)
         else:
             q_tp1, _ = qa_tp1_values.max(dim=1)
@@ -109,7 +110,8 @@ class DQNCritic(BaseCritic):
         ):
             target_param.data.copy_(param.data)
 
-    def qa_values(self, obs):
-        obs = ptu.from_numpy(obs)
+    def qa_values(self, obs: Union[np.ndarray, th.Tensor]) -> np.ndarray:
+        if isinstance(obs, np.ndarray):
+            obs = ptu.from_numpy(obs)
         qa_values = self.q_net(obs)
         return ptu.to_numpy(qa_values)

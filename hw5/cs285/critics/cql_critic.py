@@ -56,7 +56,7 @@ class CQLCritic(BaseCritic):
                  reward_n: th.Tensor,
                  terminal_n: th.Tensor
                  ) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
-        # TODO: Implement TD-error DQN loss with double q-learning
+        # TODO (Done): Implement TD-error DQN loss with double q-learning
         if reward_n.dim() == 1:
             reward_n = reward_n.view(-1, 1)
         if terminal_n.dim() == 1:
@@ -64,10 +64,14 @@ class CQLCritic(BaseCritic):
 
         qa_t_values = self.q_net.forward(ob_no)
         q_t_values = th.gather(qa_t_values, 1, ac_na.unsqueeze(1))
-
         qa_t_values_tar = self.q_net_target.forward(next_ob_no)
-        next_ac_na = self.q_net.forward(next_ob_no).argmax(1)  # double q
-        q_t_values_tar = th.gather(qa_t_values_tar, 1, next_ac_na.unsqueeze(1))
+
+        if self.double_q:
+            next_ac_na = self.q_net.forward(next_ob_no).argmax(1)  # double q
+            q_t_values_tar = th.gather(
+                qa_t_values_tar, 1, next_ac_na.unsqueeze(1))
+        else:
+            q_t_values_tar = qa_t_values.max(1)
 
         bellman_tar = reward_n + self.gamma * (1 - terminal_n) * q_t_values_tar
         loss = self.loss.forward(q_t_values, bellman_tar.detach())
@@ -104,19 +108,21 @@ class CQLCritic(BaseCritic):
         )
 
         # CQL Implementation
-        # NOTE: Implement CQL as described in the pdf and paper
+        # TODO (Done): Implement CQL as described in the pdf and paper
         # Hint: After calculating cql_loss, augment the loss appropriately
-        q_t_logsumexp = th.logsumexp(qa_t_values, dim=1)
-        cql_loss = (q_t_logsumexp - q_t_values.detach()).mean()
-
         self.optimizer.zero_grad()
+        q_t_logsumexp = qa_t_values.logsumexp(dim=1)
+        cql_loss = (q_t_logsumexp - q_t_values.detach()).mean()
         loss = loss + self.cql_alpha * cql_loss
         loss.backward()
+        th.nn.utils.clip_grad.clip_grad_norm_(
+            self.q_net.parameters(), self.grad_norm_clipping
+        )
         self.optimizer.step()
 
         info = {'Training Loss': ptu.to_numpy(loss)}
 
-        # NOTE: Uncomment these lines after implementing CQL
+        # Uncomment these lines after implementing CQL
         info['CQL Loss'] = ptu.to_numpy(cql_loss)
         info['Data q-values'] = ptu.to_numpy(q_t_values).mean()
         info['OOD q-values'] = ptu.to_numpy(q_t_logsumexp).mean()

@@ -1,16 +1,24 @@
-from .base_critic import BaseCritic
-import torch
-import torch.optim as optim
-from torch.nn import utils
-from torch import nn
-import pdb
-import numpy as np
+from __future__ import annotations
 
-from cs285.infrastructure import pytorch_util as ptu
+from typing import Any, Dict
+
+import cs285.infrastructure.pytorch_util as ptu
+# import pdb
+import numpy as np
+import torch as th
+import torch.optim as optim
+from cs285.critics.base_critic import BaseCritic
+from cs285.infrastructure.dqn_utils import OptimizerSpec
+from torch import nn
+from torch.nn import utils
+
 
 class IQLCritic(BaseCritic):
 
-    def __init__(self, hparams, optimizer_spec, **kwargs):
+    def __init__(self,
+                 hparams: Dict[str, Any],
+                 optimizer_spec: OptimizerSpec,
+                 **kwargs) -> None:
         super().__init__(**kwargs)
         self.env_name = hparams['env_name']
         self.ob_dim = hparams['ob_dim']
@@ -41,66 +49,84 @@ class IQLCritic(BaseCritic):
         self.mse_loss = nn.MSELoss()
         self.q_net.to(ptu.device)
         self.q_net_target.to(ptu.device)
-        
-        # TODO define value function
+
+        # TODO: define value function
         # HINT: see Q_net definition above and optimizer below
-        ### YOUR CODE HERE ###
-        self.v_net = None
+        self.v_net = network_initializer(self.ob_dim, 1)
+        self.v_net.to(ptu.device)
 
         self.v_optimizer = self.optimizer_spec.constructor(
             self.v_net.parameters(),
             **self.optimizer_spec.optim_kwargs
         )
-        self.learning_rate_scheduler_v  = optim.lr_scheduler.LambdaLR(
+        self.learning_rate_scheduler_v = optim.lr_scheduler.LambdaLR(
             self.v_optimizer,
             self.optimizer_spec.learning_rate_schedule,
         )
         self.iql_expectile = hparams['iql_expectile']
 
-    def expectile_loss(self, diff):
+    def expectile_loss(self, diff: th.Tensor) -> th.Tensor:
         """
         Implement expectile loss on the difference between q and v
         """
-        pass
+        # TODO (Done): Compute expectile loss
+        mask = diff < 0
+        loss = th.abs(self.iql_expectile - mask.int()) * diff ** 2
+        return loss
 
-    def update_v(self, ob_no, ac_na):
+    def update_v(self,
+                 ob_no: np.ndarray,
+                 ac_na: np.ndarray) -> Dict[str, th.Tensor]:
         """
         Update value function using expectile loss
         """
         ob_no = ptu.from_numpy(ob_no)
-        ac_na = ptu.from_numpy(ac_na).to(torch.long)
-        
+        ac_na = ptu.from_numpy(ac_na).to(th.long)
 
-        ### YOUR CODE HERE ###
-        value_loss = None
-        
+        # TODO (Done): Compute value function loss
+        q_vals = self.q_net(ob_no).gather(1, ac_na.unsqueeze(1))
+        value_loss = self.expectile_loss(
+            diff=q_vals.detach() - self.v_net(ob_no)
+        ).mean()
+
         assert value_loss.shape == ()
         self.v_optimizer.zero_grad()
         value_loss.backward()
-        utils.clip_grad_value_(self.v_net.parameters(), self.grad_norm_clipping)
+        utils.clip_grad_value_(self.v_net.parameters(),
+                               self.grad_norm_clipping)
         self.v_optimizer.step()
         self.learning_rate_scheduler_v.step()
 
         return {'Training V Loss': ptu.to_numpy(value_loss)}
-
 
     def update_q(self, ob_no, ac_na, next_ob_no, reward_n, terminal_n):
         """
         Use target v network to train Q
         """
         ob_no = ptu.from_numpy(ob_no)
-        ac_na = ptu.from_numpy(ac_na).to(torch.long)
+        ac_na = ptu.from_numpy(ac_na).to(th.long)
         next_ob_no = ptu.from_numpy(next_ob_no)
         reward_n = ptu.from_numpy(reward_n)
         terminal_n = ptu.from_numpy(terminal_n)
-        
-        ### YOUR CODE HERE ###
-        loss = None
+
+        # TODO (Done): Compute q function loss
+        if reward_n.dim() == 1:
+            reward_n = reward_n.view(-1, 1)
+        if terminal_n.dim() == 1:
+            terminal_n = terminal_n.view(-1, 1)
+
+        q_vals = self.q_net(ob_no).gather(1, ac_na.unsqueeze(1))
+        loss = nn.functional.mse_loss(
+            q_vals,
+            reward_n + self.gamma * (1 - terminal_n) *
+            self.v_net(next_ob_no).detach()
+        )
 
         assert loss.shape == ()
         self.optimizer.zero_grad()
         loss.backward()
-        utils.clip_grad_value_(self.q_net.parameters(), self.grad_norm_clipping)
+        utils.clip_grad_value_(self.q_net.parameters(),
+                               self.grad_norm_clipping)
         self.optimizer.step()
 
         self.learning_rate_scheduler.step()

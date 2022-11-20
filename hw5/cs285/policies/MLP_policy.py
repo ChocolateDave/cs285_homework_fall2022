@@ -2,15 +2,13 @@ from __future__ import annotations
 
 import abc
 import itertools
-from torch import nn
-from torch import optim
+from typing import Optional, Union
 
+import cs285.infrastructure.pytorch_util as ptu
 import numpy as np
-import torch
-from torch import distributions
-
-from cs285.infrastructure import pytorch_util as ptu
+import torch as th
 from cs285.policies.base_policy import BasePolicy
+from torch import distributions, nn, optim
 
 
 class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
@@ -55,8 +53,8 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
                                           n_layers=self.n_layers,
                                           size=self.size)
             self.logstd = nn.Parameter(
-                torch.zeros(self.ac_dim, dtype=torch.float32,
-                            device=ptu.device)
+                th.zeros(self.ac_dim, dtype=th.float32,
+                         device=ptu.device)
             )
             self.mean_net.to(ptu.device)
             self.logstd.to(ptu.device)
@@ -83,7 +81,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     ##################################
 
     def save(self, filepath):
-        torch.save(self.state_dict(), filepath)
+        th.save(self.state_dict(), filepath)
 
     ##################################
 
@@ -110,14 +108,14 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # through it. For example, you can return a torch.FloatTensor. You can also
     # return more flexible objects, such as a
     # `torch.distributions.Distribution` object. It's up to you!
-    def forward(self, observation: torch.FloatTensor):
+    def forward(self, observation: th.FloatTensor):
         if self.discrete:
             logits = self.logits_na(observation)
             action_distribution = distributions.Categorical(logits=logits)
             return action_distribution
         else:
             batch_mean = self.mean_net(observation)
-            scale_tril = torch.diag(torch.exp(self.logstd))
+            scale_tril = th.diag(th.exp(self.logstd))
             batch_dim = batch_mean.shape[0]
             batch_scale_tril = scale_tril.repeat(batch_dim, 1, 1)
             action_distribution = distributions.MultivariateNormal(
@@ -149,22 +147,24 @@ class MLPPolicyAC(MLPPolicy):
 
 class MLPPolicyAWAC(MLPPolicy):
     def __init__(self,
-                 ac_dim,
-                 ob_dim,
-                 n_layers,
-                 size,
-                 discrete=False,
-                 learning_rate=1e-4,
-                 training=True,
-                 nn_baseline=False,
-                 lambda_awac=10,
-                 **kwargs,
-                 ):
+                 ac_dim: int,
+                 ob_dim: int,
+                 n_layers: int,
+                 size: int,
+                 discrete: bool = False,
+                 learning_rate: float = 1e-4,
+                 training: bool = True,
+                 nn_baseline: bool = False,
+                 lambda_awac: int = 10,
+                 **kwargs) -> None:
         self.lambda_awac = lambda_awac
         super().__init__(ac_dim, ob_dim, n_layers, size, discrete,
                          learning_rate, training, nn_baseline, **kwargs)
 
-    def update(self, observations, actions, adv_n=None):
+    def update(self,
+               observations: Union[np.ndarray, th.Tensor],
+               actions: Union[np.ndarray, th.Tensor],
+               adv_n: Optional[Union[np.ndarray, th.Tensor]] = None) -> float:
         if adv_n is None:
             assert False
         if isinstance(observations, np.ndarray):
@@ -174,8 +174,13 @@ class MLPPolicyAWAC(MLPPolicy):
         if isinstance(adv_n, np.ndarray):
             adv_n = ptu.from_numpy(adv_n)
 
-        # TODO update the policy network utilizing AWAC update
+        # TODO (Done): update the policy network utilizing AWAC update
+        policy: th.distributions.Distribution = self.forward(observations)
+        log_prob: th.Tensor = policy.log_prob(actions)
 
-        actor_loss = None
+        self.optimizer.zero_grad()
+        actor_loss = -(log_prob * (adv_n / self.lambda_awac).exp()).mean()
+        actor_loss.backward()
+        self.optimizer.step()
 
         return actor_loss.item()

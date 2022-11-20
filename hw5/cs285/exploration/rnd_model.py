@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 import cs285.infrastructure.pytorch_util as ptu
 import numpy as np
@@ -33,7 +33,7 @@ class RNDModel(nn.Module, BaseExplorationModel):
         self.size = hparams['rnd_size']
         self.optimizer_spec = optimizer_spec
 
-        # NOTE: Create two neural networks:
+        # TODO (Done): Create two neural networks:
         # 1) f, the random function we are trying to learn.
         # 2) f_hat, the function we are using to learn f.
         # HINT: to prevent zero prediction error right from the beginning,
@@ -53,19 +53,21 @@ class RNDModel(nn.Module, BaseExplorationModel):
         )
 
     def forward(self, ob_no: th.Tensor) -> th.Tensor:
-        # NOTE: Get the prediction error for ob_no
+        # TODO (Done): Get the prediction error for ob_no
         # HINT: Remember to detach the output of self.f!
         tar = self.f.forward(ob_no).detach()
-        err = th.sqrt(th.mean((self.f_hat.forward(ob_no) - tar) ** 2, dim=1))
-        return err
+        pred = self.f_hat.forward(ob_no)
+
+        return th.norm(pred - tar, dim=1)
 
     def forward_np(self, ob_no: np.ndarray) -> np.ndarray:
         ob_no: th.Tensor = ptu.from_numpy(ob_no)
         error = self.forward(ob_no)
+
         return ptu.to_numpy(error)
 
-    def update(self, ob_no: th.Tensor) -> np.ndarray:
-        # NOTE: Update f_hat using ob_no
+    def update(self, ob_no: Union[np.ndarray, th.Tensor]) -> np.ndarray:
+        # TODO (Done): Update f_hat using ob_no
         # Hint: Take the mean prediction error across the batch
         if isinstance(ob_no, np.ndarray):
             ob_no = ptu.from_numpy(ob_no)
