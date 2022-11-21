@@ -112,7 +112,9 @@ class CQLCritic(BaseCritic):
         # Hint: After calculating cql_loss, augment the loss appropriately
         self.optimizer.zero_grad()
         q_t_logsumexp = qa_t_values.logsumexp(dim=1)
-        cql_loss = (q_t_logsumexp - q_t_values.detach()).mean()
+        # q_t_logsumexp = qa_t_values.max(1)[0] + \
+        #     (qa_t_values - qa_t_values.max(1)[0]).logsumexp(dim=1)
+        cql_loss = (q_t_logsumexp - q_t_values).mean()
         loss = loss + self.cql_alpha * cql_loss
         loss.backward()
         th.nn.utils.clip_grad.clip_grad_norm_(
@@ -127,7 +129,7 @@ class CQLCritic(BaseCritic):
         info['Data q-values'] = ptu.to_numpy(q_t_values).mean()
         info['OOD q-values'] = ptu.to_numpy(q_t_logsumexp).mean()
 
-        self.learning_rate_scheduler.step()
+        # self.learning_rate_scheduler.step()
 
         return info
 

@@ -58,7 +58,7 @@ class RNDModel(nn.Module, BaseExplorationModel):
         tar = self.f.forward(ob_no).detach()
         pred = self.f_hat.forward(ob_no)
 
-        return th.norm(pred - tar, dim=1)
+        return th.sqrt(th.mean((pred - tar) ** 2, dim=1))
 
     def forward_np(self, ob_no: np.ndarray) -> np.ndarray:
         ob_no: th.Tensor = ptu.from_numpy(ob_no)
@@ -72,7 +72,7 @@ class RNDModel(nn.Module, BaseExplorationModel):
         if isinstance(ob_no, np.ndarray):
             ob_no = ptu.from_numpy(ob_no)
         self.optimizer.zero_grad()
-        loss = self.forward(ob_no).mean()  # mean across the batch
+        loss = self.forward(ob_no).mean()  # mean across batch
         loss.backward()
         self.optimizer.step()
 

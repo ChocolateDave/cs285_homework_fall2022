@@ -105,7 +105,7 @@ class IQLAgent(DQNAgent):
             # Evaluate the exploration model on s to get the exploration bonus
             # HINT: Normalize the exploration bonus,
             # as RND values vary highly in magnitude
-            expl_bonus = self.exploration_model.forward(ob_no)
+            expl_bonus = self.exploration_model.forward_np(ob_no)
             if self.normalize_rnd:
                 expl_bonus = normalize(data=expl_bonus,
                                        mean=expl_bonus.mean(),
@@ -153,7 +153,7 @@ class IQLAgent(DQNAgent):
                 ob_no, ac_na, re_n, next_ob_no, terminal_n
             )
             actor_loss = self.eval_policy.update(
-                ob_no, ac_na=ac_na, adv_n=advantage
+                ob_no, ac_na, adv_n=advantage
             )
 
             # TODO (Done): Update Target Networks
