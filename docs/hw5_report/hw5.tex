@@ -66,5 +66,62 @@ Department of Civil \& Environ. Eng.
 \pagestyle{plain}
 
 % Problem 1
+\section*{Problem 1 "Unsupervised" RND and exploration performance}
+\subsection*{Part 1 Results}
+
+\begin{figure}[h!]
+    \centering
+    \subfigure[]{\includegraphics[width=0.35\textwidth]{q1_easy_random.png}}
+    \subfigure[]{\includegraphics[width=0.35\textwidth]{q1_easy_rnd.png}}
+    \caption{Results from PointmassEasy Environment: (a) Random exploration with epsilon-greedy; (b) Exploration with RND. State density of from the two algorithms are similar but RND unexpectedly has a denser density around the lower left corner (origin).}
+    \label{fig:1}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \subfigure[]{\includegraphics[width=0.35\textwidth]{q1_medium_random.png}}
+    \subfigure[]{\includegraphics[width=0.35\textwidth]{q1_medium_rnd.png}}
+    \caption{Results from PointmassMedium Environment: (a) Random exploration with epsilon-greedy; (b) Exploration with RND. State density of from the two algorithms are similar but RND has a more uniformly distributed density than the random exploration one.}
+    \label{fig:2}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{q1_learning_curve.png}
+    \caption{Learning curve from the two environments. RND reaches higher score faster than epsilon-greedy on the PointmassEasy environment, while slower on the PointmassMedium environment.}
+    \label{fig: 3}
+\end{figure}
+
+\subsection*{Part 2 Results}
+
+\pagebreak
+\section*{Problem 2 Offline learning on exploration data}
+\subsection*{Part 1 Compare CQL to DQN on the \texttt{medium} environment}
+
+\subsection*{Part 2 Ablation study on amount of exploration data}
+
+\subsection*{Part 3 Ablation study on the regularizer weight $\alpha$}
+
+\pagebreak
+\section*{Problem 3 "Supervised" exploration with mixed reward bonuses}
+
+\pagebreak
+\section*{Problem 4 Offline Learning with AWAC}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{q4_easy.png}
+    \caption{Learning curve from \texttt{PointmassEasy} environment: (a) supervised algorithm with different $\lambda$ settings; (b) unsupervised algorithm with different $\lambda$ settings. Explorations with supervised and unsupervised perform quite similar in this environment, which I think is partly due to the simplicity of the task.}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{q4_medium.png}
+    \caption{Learning curve from \texttt{PointmassMedium} environment: (a) supervised algorithm with different $\lambda$ settings; (b) unsupervised algorithm with different $\lambda$ settings. Unexpectedly, explorations with unsupervised perform a bit better overall in this environment with faster reaching a higher return. The best $\lambda$ setting for supervised and unsupervised RND are $\lambda=20$ and $\lambda=0.1$, respectively.}
+\end{figure}
+
+\pagebreak
+\section*{Problem 5 Offline Learning with IQL}
+
 
 \end{document}
