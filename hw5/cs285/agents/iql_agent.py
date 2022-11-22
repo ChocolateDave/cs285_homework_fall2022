@@ -106,13 +106,9 @@ class IQLAgent(DQNAgent):
             # HINT: Normalize the exploration bonus,
             # as RND values vary highly in magnitude
             expl_bonus = self.exploration_model.forward_np(ob_no)
-            if self.normalize_rnd:
-                expl_bonus = normalize(data=expl_bonus,
-                                       mean=expl_bonus.mean(),
-                                       std=self.running_rnd_rew_std)
-                self.running_rnd_rew_std = \
-                    self.rnd_gamma * self.running_rnd_rew_std + \
-                    (1 - self.rnd_gamma) * expl_bonus.std()
+            expl_bonus = normalize(data=expl_bonus,
+                                   mean=expl_bonus.mean(),
+                                   std=expl_bonus.std())
 
             # Reward Calculations
             # TODO (Done): Calculate mixed rewards,
@@ -128,12 +124,12 @@ class IQLAgent(DQNAgent):
                 (re_n + self.exploit_rew_shift)
 
             # TODO: Update Critics And Exploration Model
-            # 1): Update the exploration model (based off s')
+            # 1): Update the exploration model (based off s)
             # 2): Update the exploration critic (based off mixed_reward)
             # 3): a) Update the exploitation critic's Value function
             # 3): b) Update the exploitation critic's Q function
             # (based off env_reward)
-            expl_model_loss = self.exploration_model.update(next_ob_no)
+            expl_model_loss = self.exploration_model.update(ob_no)
             expl_loss = self.exploration_critic.update(
                 ob_no=ob_no, ac_na=ac_na, next_ob_no=next_ob_no,
                 reward_n=mixed_reward, terminal_n=terminal_n

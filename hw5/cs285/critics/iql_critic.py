@@ -84,10 +84,11 @@ class IQLCritic(BaseCritic):
         ac_na = ptu.from_numpy(ac_na).to(th.long)
 
         # TODO (Done): Compute value function loss
-        q_vals = self.q_net(ob_no).gather(1, ac_na.unsqueeze(1))
+        q_vals = self.q_net(ob_no).gather(1, ac_na.unsqueeze(1)).squeeze(1)
         value_loss = self.expectile_loss(
-            diff=q_vals.detach() - self.v_net(ob_no)
-        ).mean()
+            diff=q_vals.detach() - self.v_net(ob_no).squeeze(1)
+        )
+        value_loss = value_loss.mean()
 
         assert value_loss.shape == ()
         self.v_optimizer.zero_grad()
@@ -110,16 +111,11 @@ class IQLCritic(BaseCritic):
         terminal_n = ptu.from_numpy(terminal_n)
 
         # TODO (Done): Compute q function loss
-        if reward_n.dim() == 1:
-            reward_n = reward_n.view(-1, 1)
-        if terminal_n.dim() == 1:
-            terminal_n = terminal_n.view(-1, 1)
-
-        q_vals = self.q_net(ob_no).gather(1, ac_na.unsqueeze(1))
+        q_vals = self.q_net(ob_no).gather(1, ac_na.unsqueeze(1)).squeeze(1)
         loss = nn.functional.mse_loss(
             q_vals,
             reward_n + self.gamma * (1 - terminal_n) *
-            self.v_net(next_ob_no).detach()
+            self.v_net(next_ob_no).squeeze(1).detach()
         )
 
         assert loss.shape == ()

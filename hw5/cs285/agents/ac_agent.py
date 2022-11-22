@@ -1,11 +1,10 @@
-from collections import OrderedDict
+from __future__ import annotations
 
 from cs285.critics.bootstrapped_continuous_critic import \
     BootstrappedContinuousCritic
 from cs285.infrastructure.replay_buffer import ReplayBuffer
-from cs285.infrastructure.utils import *
 from cs285.policies.MLP_policy import MLPPolicyAC
-from .base_agent import BaseAgent
+from cs285.agents.base_agent import BaseAgent
 
 
 class ACAgent(BaseAgent):
@@ -16,7 +15,8 @@ class ACAgent(BaseAgent):
         self.agent_params = agent_params
 
         self.gamma = self.agent_params['gamma']
-        self.standardize_advantages = self.agent_params['standardize_advantages']
+        self.standardize_advantages = self.agent_params[
+            'standardize_advantages']
 
         self.actor = MLPPolicyAC(
             self.agent_params['ac_dim'],

@@ -1,10 +1,11 @@
-from .base_critic import BaseCritic
+from __future__ import annotations
+
+import cs285.infrastructure.pytorch_util as ptu
 import torch
 import torch.optim as optim
-from torch.nn import utils
+from cs285.critics.base_critic import BaseCritic
+# from torch.nn import utils
 from torch import nn
-
-from cs285.infrastructure import pytorch_util as ptu
 
 
 class DQNCritic(BaseCritic):
@@ -101,9 +102,9 @@ class DQNCritic(BaseCritic):
 
         self.optimizer.zero_grad()
         loss.backward()
-        utils.clip_grad_value_(
-            self.q_net.parameters(), self.grad_norm_clipping
-        )
+        # utils.clip_grad_value_(
+        #     self.q_net.parameters(), self.grad_norm_clipping
+        # )
         self.optimizer.step()
 
         return {

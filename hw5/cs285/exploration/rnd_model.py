@@ -58,7 +58,7 @@ class RNDModel(nn.Module, BaseExplorationModel):
         tar = self.f.forward(ob_no).detach()
         pred = self.f_hat.forward(ob_no)
 
-        return th.sqrt(th.mean((pred - tar) ** 2, dim=1))
+        return th.mean((pred - tar) ** 2, dim=1)
 
     def forward_np(self, ob_no: np.ndarray) -> np.ndarray:
         ob_no: th.Tensor = ptu.from_numpy(ob_no)
@@ -66,14 +66,16 @@ class RNDModel(nn.Module, BaseExplorationModel):
 
         return ptu.to_numpy(error)
 
-    def update(self, ob_no: Union[np.ndarray, th.Tensor]) -> np.ndarray:
+    def update(self, ob_no: Union[np.ndarray, th.Tensor]) -> float:
         # TODO (Done): Update f_hat using ob_no
         # Hint: Take the mean prediction error across the batch
         if isinstance(ob_no, np.ndarray):
             ob_no = ptu.from_numpy(ob_no)
+
         self.optimizer.zero_grad()
-        loss = self.forward(ob_no).mean()  # mean across batch
+        error = self.forward(ob_no)
+        loss = nn.functional.mse_loss(error, th.zeros_like(error))
         loss.backward()
         self.optimizer.step()
 
-        return ptu.to_numpy(loss)
+        return loss.item()
